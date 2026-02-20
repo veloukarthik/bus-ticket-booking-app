@@ -11,12 +11,18 @@ export default function SignupPage() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const res = await fetch('/api/auth/signup', { method: 'POST', body: JSON.stringify({ name, email, password }), headers: { 'Content-Type': 'application/json' } });
-    const data = await res.json();
-    if (data.token) {
-      localStorage.setItem('token', data.token);
-      router.push('/');
-    } else {
-      alert(data.error || 'Signup failed');
+    
+    try {
+      const data = await res.json();
+      if (res.ok && data.token) {
+        localStorage.setItem('token', data.token);
+        router.push('/');
+      } else {
+        alert(data.error || 'Signup failed');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred. Please try again.');
     }
   }
 
