@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
@@ -8,7 +8,7 @@ import Footer from "../components/Footer";
 
 const SeatSelector = dynamic(() => import("../components/SeatSelector"), { ssr: false });
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const [source, setSource] = useState('');
   const [destination, setDestination] = useState('');
@@ -127,9 +127,7 @@ export default function SearchPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 flex flex-col">
-      <Header />
-      <main className="flex-1 mx-auto max-w-4xl px-6 py-12 w-full">
+    <>
       <h1 className="text-2xl font-bold">Search trips</h1>
       <form onSubmit={doSearch} className="mt-4 flex gap-2">
         <input value={source} onChange={e=>setSource(e.target.value)} className="border p-2" placeholder="From" />
@@ -164,6 +162,18 @@ export default function SearchPage() {
           </div>
         </div>
       )}
+    </>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <div className="min-h-screen bg-white text-slate-900 flex flex-col">
+      <Header />
+      <main className="flex-1 mx-auto max-w-4xl px-6 py-12 w-full">
+        <Suspense fallback={<div>Loading search...</div>}>
+          <SearchContent />
+        </Suspense>
       </main>
       <Footer />
     </div>
