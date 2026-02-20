@@ -76,46 +76,6 @@ export default function MyBookingsPage() {
               ) : (
                 <div className="flex gap-2">
                   <button
-                    className="px-3 py-1 bg-blue-600 text-white rounded"
-                    disabled={loadingPayment === b.id}
-                    onClick={async () => {
-                      setLoadingPayment(b.id);
-                      try {
-                        const res = await fetch('/api/payments/initiate', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ bookingId: b.id }),
-                        });
-                        const data = await res.json();
-                        if (!res.ok) throw new Error(data?.error || 'Failed to initiate payment');
-
-                        const params = data.params || {};
-                        const paytmUrl = data.paytmUrl || (process.env.NEXT_PUBLIC_PAYTM_PROCESS_URL) || 'https://securegw-stage.paytm.in/order/process';
-
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = paytmUrl;
-                        for (const key of Object.keys(params)) {
-                          const input = document.createElement('input');
-                          input.type = 'hidden';
-                          input.name = key;
-                          input.value = String(params[key]);
-                          form.appendChild(input);
-                        }
-                        document.body.appendChild(form);
-                        form.submit();
-                      } catch (err: any) {
-                        console.error('payment initiate error', err);
-                        alert(err?.message || String(err));
-                      } finally {
-                        setLoadingPayment(null);
-                      }
-                    }}
-                  >
-                    {loadingPayment === b.id ? 'Starting...' : 'Pay (Paytm)'}
-                  </button>
-
-                  <button
                     className="px-3 py-1 bg-indigo-600 text-white rounded"
                     disabled={loadingPayment === b.id}
                     onClick={async () => {

@@ -49,11 +49,8 @@ model Booking {
   isPaid      Boolean  @default(false)
   paidAt      DateTime?
   paymentResponse String?
-  // Paytm transaction details
   txnId       String?
   paymentStatus String?
-  respCode    String?
-  respMsg     String?
   tripDate    DateTime?
   status      String   @default("PENDING")
   createdAt   DateTime @default(now())

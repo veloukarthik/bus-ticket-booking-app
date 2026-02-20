@@ -9,8 +9,7 @@ export default async function PaymentSuccessPage(props: {
   const searchParams = await props.searchParams;
   const session_id = searchParams?.session_id;
 
-  // If no session_id is present (e.g., Paytm flow redirects here after callback),
-  // we assume the update happened elsewhere or it's a direct visit.
+  // If no session_id is present, we assume it's a direct visit.
   if (!session_id) {
     redirect('/bookings');
   }
