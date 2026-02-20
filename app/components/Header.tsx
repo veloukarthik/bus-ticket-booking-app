@@ -9,7 +9,7 @@ export default function Header() {
     <header className="w-full bg-white/80 backdrop-blur-sm border-b border-gray-200">
       <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
-          <img src="/letsgo.png" alt="NueGo" className="h-8 w-auto" />
+          <img src="/letsgo.png" alt="LetsGo" className="h-8 w-auto" />
           <span className="font-semibold text-lg text-slate-800">LetsGo</span>
         </Link>
 

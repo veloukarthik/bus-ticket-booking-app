@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NueGo - Modern Bus Ticketing",
-  description: "NueGo: modern ticketing, fleet and analytics for bus operators.",
+  title: "LetsGo - Modern Bus Ticketing",
+  description: "LetsGo: modern ticketing, fleet and analytics for bus operators.",
 };
 
 export default function RootLayout({
