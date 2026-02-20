@@ -39,7 +39,13 @@ export async function POST(req: Request) {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    const { tripId, seats } = await req.json();
+    let body: any;
+    try {
+      body = await req.json();
+    } catch (e) {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
+    const { tripId, seats } = body;
 
     if (!tripId || !seats || !Array.isArray(seats) || seats.length === 0) {
       return NextResponse.json({ error: 'Invalid booking data' }, { status: 400 });
@@ -56,10 +62,10 @@ export async function POST(req: Request) {
     });
 
     const occupied = new Set<string>();
-    existing.forEach(b => {
+    existing.forEach((b: { seats: string }) => {
       try {
         const s = JSON.parse(b.seats);
-        if (Array.isArray(s)) s.forEach(seat => occupied.add(seat));
+        if (Array.isArray(s)) s.forEach((seat: string) => occupied.add(seat));
       } catch (e) {}
     });
 
@@ -68,25 +74,33 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'One or more selected seats are already booked.' }, { status: 409 });
     }
 
-    // Get trip details for price
-    const trip = await prisma.trip.findUnique({ where: { id: Number(tripId) } });
-    if (!trip) return NextResponse.json({ error: 'Trip not found' }, { status: 404 });
+  // Normalize and validate IDs
+  const tripIdNum = Number(tripId);
+  const userIdNum = Number(userId);
+  if (isNaN(tripIdNum)) return NextResponse.json({ error: 'Invalid trip id' }, { status: 400 });
+  if (isNaN(userIdNum)) return NextResponse.json({ error: 'Invalid user id' }, { status: 401 });
+
+  // Verify trip and user exist to avoid FK errors
+  const trip = await prisma.trip.findUnique({ where: { id: tripIdNum } });
+  if (!trip) return NextResponse.json({ error: 'Trip not found' }, { status: 404 });
+  const user = await prisma.user.findUnique({ where: { id: userIdNum } });
+  if (!user) return NextResponse.json({ error: 'User not found' }, { status: 401 });
 
     const booking = await prisma.booking.create({
       data: {
-        userId,
-        tripId: Number(tripId),
+        userId: userIdNum,
+        tripId: tripIdNum,
         seats: JSON.stringify(seats),
         seatCount: seats.length,
         totalPrice: trip.price * seats.length,
         status: 'PENDING',
-        tripDate: trip.departure
+        tripDate: trip.departure,
       }
     });
 
     return NextResponse.json({ booking });
   } catch (e: any) {
-    console.error(e);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    console.error('Bookings POST error:', e);
+    return NextResponse.json({ error: e?.message || 'Server error' }, { status: 500 });
   }
 }
