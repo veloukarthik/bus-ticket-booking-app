@@ -22,7 +22,7 @@ export async function POST(req: Request) {
           price_data: {
             currency: 'inr',
             product_data: { name: `Booking #${booking.id}` },
-            unit_amount: booking.totalPrice * 100,
+            unit_amount: Math.round(booking.totalPrice * 100),
           },
           quantity: 1,
         },

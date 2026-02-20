@@ -1,22 +1,42 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
-  const { source, destination, date } = await req.json();
-  if (!source || !destination || !date) return NextResponse.json({ error: "Missing" }, { status: 400 });
+  try {
+    const { source, destination, date } = await req.json();
 
-  const start = new Date(date);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 1);
+    const where: any = {};
 
-  const trips = await prisma.trip.findMany({
-    where: {
-      source: { equals: source },
-      destination: { equals: destination },
-      departure: { gte: start, lt: end },
-    },
-    include: { vehicle: true },
-  });
+    if (source) {
+      where.source = { contains: source };
+    }
+    if (destination) {
+      where.destination = { contains: destination };
+    }
 
-  return NextResponse.json({ trips });
+    if (date) {
+      // Filter by date range (start of day to end of day)
+      // date string is YYYY-MM-DD
+      const start = new Date(date);
+      const end = new Date(date);
+      end.setDate(end.getDate() + 1);
+
+      if (!isNaN(start.getTime())) {
+        where.departure = {
+          gte: start,
+          lt: end,
+        };
+      }
+    }
+
+    const trips = await prisma.trip.findMany({
+      where,
+      include: { vehicle: true },
+      orderBy: { departure: 'asc' },
+    });
+
+    return NextResponse.json({ trips });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
 }

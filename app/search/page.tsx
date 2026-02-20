@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 const SeatSelector = dynamic(() => import("../components/SeatSelector"), { ssr: false });
 
@@ -46,6 +48,21 @@ export default function SearchPage() {
   }, [searchParams?.toString()]);
 
   const [selectingTrip, setSelectingTrip] = useState<number | null>(null);
+  const [bookedSeats, setBookedSeats] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (selectingTrip) {
+      setBookedSeats([]);
+      fetch(`/api/trips/${selectingTrip}/booked-seats`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.bookedSeats) {
+            setBookedSeats(data.bookedSeats);
+          }
+        })
+        .catch(err => console.error("Failed to fetch booked seats", err));
+    }
+  }, [selectingTrip]);
 
   async function createBooking(tripId: number, seats: string[]) {
     try {
@@ -72,25 +89,16 @@ export default function SearchPage() {
         // created booking, now initiate payment
         const booking = data.booking;
         try {
-          const initRes = await fetch('/api/payments/initiate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bookingId: booking.id, amount: booking.totalPrice, customerId: booking.userId }) });
-          const initData = await initRes.json();
-          if (initRes.ok && initData.params && initData.paytmUrl) {
-            // create a form and submit to Paytm staging URL
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = initData.paytmUrl;
-            Object.keys(initData.params).forEach((k: string) => {
-              const inp = document.createElement('input');
-              inp.type = 'hidden';
-              inp.name = k;
-              inp.value = initData.params[k];
-              form.appendChild(inp);
-            });
-            document.body.appendChild(form);
-            form.submit();
-            return;
+          const stripeRes = await fetch('/api/payments/stripe/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bookingId: booking.id }),
+          });
+          const stripeData = await stripeRes.json();
+          if (stripeRes.ok && stripeData.url) {
+            window.location.href = stripeData.url;
           } else {
-            alert(initData.error || 'Failed to initiate payment');
+            alert(stripeData.error || 'Failed to initiate Stripe payment');
             return;
           }
         } catch (e) {
@@ -99,6 +107,16 @@ export default function SearchPage() {
           return;
         }
       } else {
+        if (res.status === 409) {
+          const refresh = await fetch(`/api/trips/${tripId}/booked-seats`);
+          if (refresh.ok) {
+            const refreshData = await refresh.json();
+            if (refreshData.bookedSeats) {
+              setBookedSeats(refreshData.bookedSeats);
+            }
+          }
+          return;
+        }
         const msg = (data && data.error) || `Request failed (${res.status})`;
         alert(msg);
       }
@@ -109,7 +127,9 @@ export default function SearchPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-12">
+    <div className="min-h-screen bg-white text-slate-900 flex flex-col">
+      <Header />
+      <main className="flex-1 mx-auto max-w-4xl px-6 py-12 w-full">
       <h1 className="text-2xl font-bold">Search trips</h1>
       <form onSubmit={doSearch} className="mt-4 flex gap-2">
         <input value={source} onChange={e=>setSource(e.target.value)} className="border p-2" placeholder="From" />
@@ -137,13 +157,15 @@ export default function SearchPage() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
           <div className="bg-white p-6 rounded max-w-2xl w-full">
             <h3 className="font-semibold">Select seats</h3>
-            <SeatSelector onConfirmAction={(seats: string[]) => createBooking(selectingTrip, seats)} />
+            <SeatSelector onConfirmAction={(seats: string[]) => createBooking(selectingTrip, seats)} bookedSeats={bookedSeats} />
             <div className="mt-4 text-right">
               <button onClick={()=>setSelectingTrip(null)} className="mr-2">Cancel</button>
             </div>
           </div>
         </div>
       )}
+      </main>
+      <Footer />
     </div>
   );
 }

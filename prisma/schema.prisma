@@ -54,5 +54,7 @@ model Booking {
   paymentStatus String?
   respCode    String?
   respMsg     String?
+  tripDate    DateTime?
+  status      String   @default("PENDING")
   createdAt   DateTime @default(now())
 }

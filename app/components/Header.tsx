@@ -9,21 +9,23 @@ export default function Header() {
     <header className="w-full bg-white/80 backdrop-blur-sm border-b border-gray-200">
       <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
-          <img src="/logo.svg" alt="NueGo" className="h-8 w-auto" />
-          <span className="font-semibold text-lg text-slate-800">NueGo</span>
+          <img src="/letsgo.png" alt="NueGo" className="h-8 w-auto" />
+          <span className="font-semibold text-lg text-slate-800">LetsGo</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 text-sm text-slate-700">
-          <a href="#services" className="hover:text-slate-900">Services</a>
+          {/* <a href="#services" className="hover:text-slate-900">Services</a>
           <a href="#about" className="hover:text-slate-900">About</a>
-          <a href="#contact" className="hover:text-slate-900">Contact</a>
+          <a href="#contact" className="hover:text-slate-900">Contact</a> */}
           {user ? (
             <>
               {user.isAdmin && <a href="/admin" className="hover:text-slate-900">Admin</a>}
+              <a href="/bookings" className="hover:text-slate-900">Bookings</a>
               <button onClick={logout} className="ml-2 rounded-full border border-slate-200 px-4 py-2 text-sm">Logout</button>
             </>
           ) : (
             <>
+              <a href="/bookings" className="hover:text-slate-900">Bookings</a>
               <a href="/login" className="hover:text-slate-900">Log in</a>
               <a href="/signup" className="ml-2 rounded-full bg-sky-600 px-4 py-2 text-white text-sm shadow-sm hover:bg-sky-700">Sign up</a>
             </>

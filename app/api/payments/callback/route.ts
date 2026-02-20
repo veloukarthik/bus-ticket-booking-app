@@ -134,18 +134,27 @@ export async function POST(req: Request) {
         const respMsg = data.RESPMSG || data.RESP_MSG || verifyData.RESPMSG || verifyData.RESP_MSG || null;
         const respCode = data.RESPCODE || data.RESP_CODE || verifyData.RESPCODE || verifyData.RESP_CODE || null;
 
-        await prisma.booking.update({
+        const booking = await prisma.booking.findUnique({
           where: { id: bookingId },
-          data: {
-            isPaid: true,
-            paidAt: new Date(),
-            paymentResponse: JSON.stringify(verifyData),
-            txnId: txnId ?? undefined,
-            paymentStatus: status ?? undefined,
-            respCode: respCode ?? undefined,
-            respMsg: respMsg ?? undefined,
-          },
+          include: { trip: true },
         });
+
+        if (booking) {
+          await prisma.booking.update({
+            where: { id: bookingId },
+            data: {
+              isPaid: true,
+              paidAt: new Date(),
+              status: 'CONFIRMED',
+              paymentResponse: JSON.stringify(verifyData),
+              txnId: txnId ?? undefined,
+              paymentStatus: status ?? undefined,
+              respCode: respCode ?? undefined,
+              respMsg: respMsg ?? undefined,
+              tripDate: booking.trip.departure,
+            },
+          });
+        }
       } catch (e: unknown) {
         console.error('failed to update booking payment status', e);
       }
