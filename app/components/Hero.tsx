@@ -16,21 +16,29 @@ export default function Hero() {
   }
 
   return (
-    <section className="py-20 sm:py-28 bg-gradient-to-r from-sky-50 to-white">
+    <section className="py-12 sm:py-16 bg-gradient-to-r from-sky-50 to-white">
       <div className="mx-auto max-w-6xl px-6 text-center">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900">
-          Book bus tickets quickly — anywhere, anytime
+          Travel better with premium comfort
         </h1>
-        <p className="mt-4 max-w-2xl mx-auto text-lg text-slate-600">
-          Find buses by route and date, choose seats and checkout in a few clicks.
+        <p className="mt-4 max-w-2xl mx-auto text-lg text-[var(--muted)]">
+          Book premium, safe and comfortable bus journeys. Compare schedules, pick seats, and pay securely.
         </p>
 
-        <form onSubmit={onSearch} className="mt-8 mx-auto max-w-3xl bg-white shadow rounded-lg p-4 flex gap-2 items-center">
-          <input value={source} onChange={e=>setSource(e.target.value)} placeholder="From (city)" className="flex-1 border p-2 rounded" />
-          <input value={destination} onChange={e=>setDestination(e.target.value)} placeholder="To (city)" className="flex-1 border p-2 rounded" />
-          <input value={date} onChange={e=>setDate(e.target.value)} type="date" className="border p-2 rounded" />
-          <button type="submit" className="rounded bg-sky-600 px-4 py-2 text-white">Search buses</button>
-        </form>
+        <div className="mt-8 grid gap-4 grid-cols-1 md:grid-cols-3">
+          <div className="card p-4 fade-in-up">
+            <div className="font-semibold">Wide selection</div>
+            <div className="text-sm text-[var(--muted)] mt-2">Hundreds of buses across cities and operators.</div>
+          </div>
+          <div className="card p-4 fade-in-up">
+            <div className="font-semibold">Easy seat selection</div>
+            <div className="text-sm text-[var(--muted)] mt-2">Visual seat maps with clear availability and rules.</div>
+          </div>
+          <div className="card p-4 fade-in-up">
+            <div className="font-semibold">Secure payments</div>
+            <div className="text-sm text-[var(--muted)] mt-2">Pay with Stripe or Paytm and get instant confirmations.</div>
+          </div>
+        </div>
       </div>
     </section>
   );

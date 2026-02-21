@@ -37,7 +37,7 @@ export default function AdminVehicles() {
             <input value={name} onChange={e=>setName(e.target.value)} placeholder="Name" className="border p-2" />
             <input value={number} onChange={e=>setNumber(e.target.value)} placeholder="Number" className="border p-2" />
             <input value={capacity} onChange={e=>setCapacity(Number(e.target.value))} placeholder="Capacity" type="number" className="border p-2 w-24" />
-            <button onClick={create} className="rounded bg-sky-600 px-4 py-2 text-white">Create</button>
+            <button onClick={create} className="rounded bg-[var(--theme-primary)] px-4 py-2 text-white">Create</button>
           </div>
         </div>
       </div>

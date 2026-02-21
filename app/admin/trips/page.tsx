@@ -51,7 +51,7 @@ export default function AdminTrips() {
             <input value={arrival} onChange={e=>setArrival(e.target.value)} placeholder="Arrival ISO" className="border p-2" />
             <input value={price} onChange={e=>setPrice(Number(e.target.value))} placeholder="Price" type="number" className="border p-2" />
             <div className="col-span-2 text-right">
-              <button onClick={create} className="rounded bg-sky-600 px-4 py-2 text-white">Create trip</button>
+              <button onClick={create} className="rounded bg-[var(--theme-primary)] px-4 py-2 text-white">Create trip</button>
             </div>
           </div>
         </div>

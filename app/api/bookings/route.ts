@@ -23,9 +23,9 @@ export async function GET(req: Request) {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    const bookings = await prisma.booking.findMany({
+    const bookings = await (prisma as any).booking.findMany({
       where: { userId },
-      include: { trip: true },
+      include: { trip: true, passengers: true },
       orderBy: { createdAt: 'desc' }
     });
     return NextResponse.json({ bookings });
@@ -45,9 +45,12 @@ export async function POST(req: Request) {
     } catch (e) {
       return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
     }
-    const { tripId, seats } = body;
+    const { tripId, seats, passengers } = body;
 
-    if (!tripId || !seats || !Array.isArray(seats) || seats.length === 0) {
+    // support old clients that send only seats array
+    const seatsArray = Array.isArray(seats) ? seats : (Array.isArray(passengers) ? passengers.map((p: any) => p.seat) : []);
+
+    if (!tripId || !seatsArray || !Array.isArray(seatsArray) || seatsArray.length === 0) {
       return NextResponse.json({ error: 'Invalid booking data' }, { status: 400 });
     }
 
@@ -69,9 +72,58 @@ export async function POST(req: Request) {
       } catch (e) {}
     });
 
-    const conflict = seats.some(s => occupied.has(s));
+    const conflict = seatsArray.some(s => occupied.has(s));
     if (conflict) {
       return NextResponse.json({ error: 'One or more selected seats are already booked.' }, { status: 409 });
+    }
+
+    // Additional rule: if a female has already booked one seat of a 2-seater pair (B/C), disallow a male passenger booking the adjacent seat
+    // We'll inspect existing passengers (if present) for gender info
+    let existingPassengers: any[] = [];
+    try {
+      if (prisma && (prisma as any).passenger && typeof (prisma as any).passenger.findMany === 'function') {
+        existingPassengers = await (prisma as any).passenger.findMany({
+          where: { booking: { tripId: Number(tripId), status: { in: ['CONFIRMED', 'PENDING'] } } },
+          select: { seat: true, gender: true }
+        });
+      }
+    } catch (err) {
+      console.error('passenger lookup skipped due to error or missing model', err);
+      existingPassengers = [];
+    }
+
+    const existingGenderMap = new Map<string, string>();
+    existingPassengers.forEach((p: any) => existingGenderMap.set(p.seat, p.gender));
+
+    // helper to get pair partner for seats like '1B' <-> '1C'
+    function partnerSeat(seat: string) {
+      if (!seat) return '';
+      const last = seat.slice(-1).toUpperCase();
+      if (last === 'B') return seat.slice(0, -1) + 'C';
+      if (last === 'C') return seat.slice(0, -1) + 'B';
+      return '';
+    }
+
+    // check conflicts between requested passengers and existing passengers
+    if (Array.isArray(passengers)) {
+      for (const p of passengers) {
+        const partner = partnerSeat(p.seat);
+        const partnerGender = existingGenderMap.get(partner);
+        if (partnerGender === 'Female' && p.gender && p.gender.toLowerCase() === 'male') {
+          return NextResponse.json({ error: `Cannot book seat ${p.seat} as male because adjacent seat ${partner} is booked by female.` }, { status: 409 });
+        }
+      }
+
+      // also check intra-request conflicts (one passenger in same request booking B female and other booking C male)
+      const requestGenderMap = new Map<string, string>();
+      passengers.forEach((p: any) => requestGenderMap.set(p.seat, p.gender));
+      for (const p of passengers) {
+        const partner = partnerSeat(p.seat);
+        const partnerGender = requestGenderMap.get(partner);
+        if (partnerGender === 'Female' && p.gender && p.gender.toLowerCase() === 'male') {
+          return NextResponse.json({ error: `Cannot book seat ${p.seat} as male because adjacent seat ${partner} in same request is booked by female.` }, { status: 409 });
+        }
+      }
     }
 
   // Normalize and validate IDs
@@ -90,13 +142,34 @@ export async function POST(req: Request) {
       data: {
         userId: userIdNum,
         tripId: tripIdNum,
-        seats: JSON.stringify(seats),
-        seatCount: seats.length,
-        totalPrice: trip.price * seats.length,
+        seats: JSON.stringify(seatsArray),
+        seatCount: seatsArray.length,
+        totalPrice: trip.price * seatsArray.length,
         status: 'PENDING',
         tripDate: trip.departure,
       }
     });
+
+    // create passenger records if provided
+    if (Array.isArray(passengers) && passengers.length > 0) {
+      const pdata = passengers.map((p: any) => ({
+        bookingId: booking.id,
+        name: p.name || '',
+        age: p.age ? Number(p.age) : null,
+        mobile: p.mobile || '',
+        gender: p.gender || '',
+        seat: p.seat || ''
+      }));
+      try {
+        if (prisma && (prisma as any).passenger && typeof (prisma as any).passenger.createMany === 'function') {
+          await (prisma as any).passenger.createMany({ data: pdata });
+        } else {
+          console.warn('prisma.passenger.createMany not available; skipping passenger create');
+        }
+      } catch (e) {
+        console.error('Failed to create passengers', e);
+      }
+    }
 
     return NextResponse.json({ booking });
   } catch (e: any) {

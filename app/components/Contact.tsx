@@ -12,7 +12,7 @@ export default function Contact() {
           </div>
           <textarea className="mt-4 w-full rounded border border-slate-200 px-3 py-2" rows={4} placeholder="Message" />
           <div className="mt-4">
-            <button className="rounded bg-sky-600 px-4 py-2 text-white">Send</button>
+            <button className="rounded bg-[var(--theme-primary)] px-4 py-2 text-white" aria-label="Send message">Send</button>
           </div>
         </form>
       </div>

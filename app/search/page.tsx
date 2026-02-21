@@ -48,26 +48,32 @@ function SearchContent() {
   }, [searchParams?.toString()]);
 
   const [selectingTrip, setSelectingTrip] = useState<number | null>(null);
-  const [bookedSeats, setBookedSeats] = useState<string[]>([]);
+  const [bookedPassengers, setBookedPassengers] = useState<any[]>([]);
 
   useEffect(() => {
     if (selectingTrip) {
-      setBookedSeats([]);
+      setBookedPassengers([]);
       fetch(`/api/trips/${selectingTrip}/booked-seats`)
         .then(res => res.json())
         .then(data => {
-          if (data.bookedSeats) {
-            setBookedSeats(data.bookedSeats);
+          if (data.bookedPassengers) {
+            // map to simplified bookedPassengers for SeatSelector
+            const b = data.bookedPassengers.map((p: any) => ({ seat: p.seat, gender: p.gender }));
+            setBookedPassengers(b as any);
+          } else if (data.bookedSeats) {
+            const b = data.bookedSeats.map((s: string) => ({ seat: s }));
+            setBookedPassengers(b as any);
           }
         })
         .catch(err => console.error("Failed to fetch booked seats", err));
     }
   }, [selectingTrip]);
 
-  async function createBooking(tripId: number, seats: string[]) {
+  async function createBooking(tripId: number, passengers: any[]) {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('/api/bookings', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ tripId, seats }) });
+      const seats = Array.isArray(passengers) ? passengers.map(p => p.seat) : [];
+      const res = await fetch('/api/bookings', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ tripId, seats, passengers }) });
 
       // try to parse JSON, but handle empty/non-JSON responses
       let data: any = null;
@@ -110,11 +116,12 @@ function SearchContent() {
         if (res.status === 409) {
           const refresh = await fetch(`/api/trips/${tripId}/booked-seats`);
           if (refresh.ok) {
-            const refreshData = await refresh.json();
-            if (refreshData.bookedSeats) {
-              setBookedSeats(refreshData.bookedSeats);
+              const refreshData = await refresh.json();
+              if (refreshData.bookedSeats) {
+                const b = refreshData.bookedSeats.map((s: string) => ({ seat: s }));
+                setBookedPassengers(b as any);
+              }
             }
-          }
           return;
         }
         const msg = (data && data.error) || `Request failed (${res.status})`;
@@ -129,11 +136,11 @@ function SearchContent() {
   return (
     <>
       <h1 className="text-2xl font-bold">Search trips</h1>
-      <form onSubmit={doSearch} className="mt-4 flex gap-2">
-        <input value={source} onChange={e=>setSource(e.target.value)} className="border p-2" placeholder="From" />
-        <input value={destination} onChange={e=>setDestination(e.target.value)} className="border p-2" placeholder="To" />
-        <input type="date" value={date} onChange={e=>setDate(e.target.value)} className="border p-2" />
-        <button className="rounded bg-sky-600 px-4 text-white" disabled={loading}>{loading ? 'Searching...' : 'Search'}</button>
+      <form onSubmit={doSearch} role="search" aria-label="Search trips" className="mt-4 flex gap-2">
+        <input aria-label="From" value={source} onChange={e=>setSource(e.target.value)} className="border p-2" placeholder="From" />
+        <input aria-label="To" value={destination} onChange={e=>setDestination(e.target.value)} className="border p-2" placeholder="To" />
+        <input aria-label="Date" type="date" value={date} onChange={e=>setDate(e.target.value)} className="border p-2" />
+        <button className="rounded bg-[var(--theme-primary)] px-4 text-white" disabled={loading}>{loading ? 'Searching...' : 'Search'}</button>
       </form>
 
       <div className="mt-6 grid gap-4">
@@ -145,7 +152,7 @@ function SearchContent() {
             </div>
             <div className="flex items-center gap-4">
               <div className="font-medium">₹{t.price}</div>
-              <button onClick={()=>setSelectingTrip(t.id)} className="rounded bg-sky-600 px-3 py-1 text-white">Book</button>
+              <button onClick={()=>setSelectingTrip(t.id)} className="rounded bg-[var(--theme-primary)] px-3 py-1 text-white" aria-label={`Book trip ${t.id}`}>Book</button>
             </div>
           </div>
         ))}
@@ -155,7 +162,7 @@ function SearchContent() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
           <div className="bg-white p-6 rounded max-w-2xl w-full">
             <h3 className="font-semibold">Select seats</h3>
-            <SeatSelector onConfirmAction={(seats: string[]) => createBooking(selectingTrip, seats)} bookedSeats={bookedSeats} />
+            <SeatSelector onConfirmAction={(passengers: any[]) => createBooking(selectingTrip, passengers)} bookedPassengers={bookedPassengers as any} />
             <div className="mt-4 text-right">
               <button onClick={()=>setSelectingTrip(null)} className="mr-2">Cancel</button>
             </div>

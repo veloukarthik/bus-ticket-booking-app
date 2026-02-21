@@ -67,8 +67,25 @@ export default function MyBookingsPage() {
             <div className="text-sm text-slate-500 mt-1">
               {tripDate.toLocaleDateString()} at {tripDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </div>
-            <div className="text-sm text-slate-600">Seats: {b.seats}</div>
             <div className="text-sm text-slate-600">Total: ₹{b.totalPrice}</div>
+            <div className="mt-2">
+              <div className="text-sm font-medium">Passengers</div>
+              {b.passengers && b.passengers.length > 0 ? (
+                <ul className="mt-1 space-y-1">
+                  {b.passengers.map((p: any) => (
+                    <li key={p.id} className="text-sm text-slate-700 flex items-center justify-between">
+                      <div>
+                        <div className="font-medium">{p.name || '—'}</div>
+                        <div className="text-xs text-slate-500">{p.gender || ''} • {p.age ?? ''} yrs • {p.mobile || ''}</div>
+                      </div>
+                      <div className="ml-4 px-2 py-1 rounded text-sm font-medium bg-slate-100">{p.seat}</div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-sm text-slate-600">Seats: {(() => { try { return JSON.parse(b.seats).join(', '); } catch { return b.seats; } })()}</div>
+              )}
+            </div>
             <div className="text-sm text-slate-600">Status: <span className={`font-medium uppercase ${displayStatus === 'CANCELLED' ? 'text-red-600' : displayStatus === 'COMPLETED' ? 'text-slate-500' : 'text-green-600'}`}>{displayStatus}</span></div>
             <div className="mt-3">
               {b.isPaid ? (
