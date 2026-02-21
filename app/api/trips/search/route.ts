@@ -5,6 +5,15 @@ export async function POST(req: Request) {
   try {
     const { source, destination, date } = await req.json();
 
+    // Prevent searches where source and destination are identical
+    if (source && destination) {
+      const a = String(source).trim().toLowerCase();
+      const b = String(destination).trim().toLowerCase();
+      if (a && b && a === b) {
+        return NextResponse.json({ error: 'Source and destination cannot be the same' }, { status: 400 });
+      }
+    }
+
     const where: any = {};
 
     if (source) {

@@ -7,7 +7,12 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { name, email, password } = body;
-    if (!email || !password) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  if (!email || !password) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+
+  // Password policy: at least 8 chars, must include letters and numbers
+  const pwd = (password || '').trim();
+  const pwdValid = /(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}/.test(pwd);
+  if (!pwdValid) return NextResponse.json({ error: "Password must be at least 8 characters and include letters and numbers" }, { status: 400 });
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) return NextResponse.json({ error: "User exists" }, { status: 409 });
