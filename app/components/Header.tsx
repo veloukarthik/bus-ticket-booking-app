@@ -12,16 +12,17 @@ export default function Header() {
   return (
     <header className="w-full bg-gradient-to-r from-[rgba(14,165,233,0.06)] to-[rgba(47,191,113,0.03)] backdrop-blur-sm border-b border-gray-100">
       <div className="mx-auto max-w-6xl px-6 py-5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3" aria-label="Homepage">
-          <img src="/letsgo.png" alt="LetsGo" className="h-10 w-auto" />
-          <div>
+        <Link href="/" className="flex items-center gap-1" aria-label="Homepage">
+          <img src="/letsgo.png" alt="LetsGo" className="h-20 w-40" />
+          {/* <div>
             <div className="font-semibold text-lg text-slate-800">LetsGo</div>
             <div className="text-xs text-[var(--muted)]">Premium Bus Tickets</div>
-          </div>
+          </div> */}
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 text-sm text-slate-700" aria-label="Primary navigation">
           <a href="/" className="hover:text-[var(--theme-primary)] transition">Home</a>
+          <a href="/about" className="hover:text-[var(--theme-primary)] transition">About</a>
           <a href="/bookings" className="hover:text-[var(--theme-primary)] transition" aria-label="Bookings">Bookings</a>
           {user ? (
             <>
