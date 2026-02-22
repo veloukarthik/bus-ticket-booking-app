@@ -7,6 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "security:audit": "npm audit --audit-level=high",
+    "security:audit:prod": "npm audit --omit=dev --audit-level=high",
     "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
@@ -34,6 +38,11 @@
     "prisma": "5.10.0",
     "tailwindcss": "^4",
     "ts-node": "10",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^1.2.2",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/user-event": "^14.4.3",
+    "jsdom": "^22.1.0"
   }
 }
