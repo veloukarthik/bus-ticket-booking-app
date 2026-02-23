@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -18,6 +19,10 @@ export default function LoginPage() {
     } else {
       alert(data.error || 'Login failed');
     }
+  }
+
+  async function signInWithGitHub() {
+    await signIn("github", { callbackUrl: "/auth/success" });
   }
 
   return (
@@ -40,6 +45,18 @@ export default function LoginPage() {
             </div>
             <button className="mt-2 rounded bg-[var(--theme-primary)] py-2 text-white">Sign in</button>
           </form>
+          <div className="my-4 flex items-center">
+            <div className="h-px flex-1 bg-slate-200"></div>
+            <span className="px-3 text-xs uppercase tracking-wide text-slate-500">or</span>
+            <div className="h-px flex-1 bg-slate-200"></div>
+          </div>
+          <button
+            type="button"
+            onClick={signInWithGitHub}
+            className="rounded border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Continue with GitHub
+          </button>
         </div>
       </div>
     </div>

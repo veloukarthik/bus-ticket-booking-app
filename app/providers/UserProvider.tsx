@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { getSession, SessionProvider, signOut } from "next-auth/react";
 
 type User = { id: number; email: string; name?: string; isAdmin?: boolean } | null;
 
@@ -8,22 +9,48 @@ const UserContext = createContext<{ user: User; setUser: (u: User) => void; logo
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User>(null);
 
-  useEffect(()=>{
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    // naive decode: token payload is base64 in the middle
+  function hydrateUserFromToken(token: string) {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       setUser({ id: payload.userId, email: payload.email, isAdmin: payload.isAdmin });
-    } catch (e) {}
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function hydrateUser() {
+      const token = localStorage.getItem("token");
+      if (token && hydrateUserFromToken(token)) return;
+
+      const session = await getSession();
+      if (cancelled) return;
+      if (!session?.appToken) return;
+
+      localStorage.setItem("token", session.appToken);
+      hydrateUserFromToken(session.appToken);
+    }
+
+    hydrateUser();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  function logout(){
-    localStorage.removeItem('token');
+  function logout() {
+    localStorage.removeItem("token");
+    signOut({ redirect: false }).catch(() => {});
     setUser(null);
   }
 
-  return <UserContext.Provider value={{ user, setUser, logout }}>{children}</UserContext.Provider>;
+  return (
+    <SessionProvider>
+      <UserContext.Provider value={{ user, setUser, logout }}>{children}</UserContext.Provider>
+    </SessionProvider>
+  );
 }
 
 export const useUser = () => useContext(UserContext);

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useUser } from "../providers/UserProvider";
 import { validatePassword } from '@/lib/password';
+import { signIn } from "next-auth/react";
 
 export default function AuthModal({ open, onCloseAction, initial }: { open: boolean; onCloseAction: () => void; initial?: 'login'|'signup' }) {
   const [mode, setMode] = useState<'login'|'signup'>(initial || 'login');
@@ -87,6 +88,12 @@ export default function AuthModal({ open, onCloseAction, initial }: { open: bool
     }
   }
 
+  async function signInWithGitHub() {
+    setLoading(true);
+    await signIn("github", { callbackUrl: "/auth/success" });
+    setLoading(false);
+  }
+
   const content = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center" role="dialog" aria-modal="true" aria-label={mode === 'login' ? 'Login dialog' : 'Sign up dialog'}>
       <div className="absolute inset-0 bg-black/50" onClick={onCloseAction} aria-hidden="true"></div>
@@ -157,6 +164,19 @@ export default function AuthModal({ open, onCloseAction, initial }: { open: bool
                   </div>
                 </div>
               </form>
+              <div className="my-4 flex items-center">
+                <div className="h-px flex-1 bg-slate-200"></div>
+                <span className="px-3 text-xs uppercase tracking-wide text-slate-500">or</span>
+                <div className="h-px flex-1 bg-slate-200"></div>
+              </div>
+              <button
+                type="button"
+                onClick={signInWithGitHub}
+                disabled={loading}
+                className="w-full rounded border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              >
+                Continue with GitHub
+              </button>
             </div>
           </div>
         </div>
