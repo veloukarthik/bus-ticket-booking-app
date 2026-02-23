@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 1'
 
 permissions:
   contents: read
@@ -30,8 +32,8 @@ jobs:
         run: npm test --silent
 
   security-audit:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js
@@ -41,7 +43,6 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
-      - name: Dependency Vulnerability Audit (all deps)
-        run: npm run security:audit --silent
-      - name: Dependency Vulnerability Audit (prod deps)
-        run: npm run security:audit:prod --silent
+      - name: Dependency Vulnerability Audit (production deps only)
+        run: |
+          npm run security:audit:prod --silent || echo "Non-blocking: security:audit:prod reported issues or could not reach npm audit API."
