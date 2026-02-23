@@ -42,7 +42,7 @@ describe('BannerSearch component', () => {
 
     fireEvent.change(from, { target: { value: 'Bangalore' } });
     fireEvent.change(to, { target: { value: 'Bangalore' } });
-    fireEvent.submit(screen.getByRole('search', { name: /search buses/i }));
+    fireEvent.submit(screen.getByRole('search', { name: /search rides/i }));
 
     expect(await screen.findByText(/cannot be the same/i)).toBeInTheDocument();
     expect(push).not.toHaveBeenCalled();
@@ -56,7 +56,7 @@ describe('BannerSearch component', () => {
 
     fireEvent.change(from, { target: { value: 'Chennai' } });
     fireEvent.change(to, { target: { value: 'Hyderabad' } });
-    fireEvent.click(screen.getByRole('button', { name: /Search buses/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Search rides/i }));
 
     await waitFor(() => {
       expect(push).toHaveBeenCalledTimes(1);

@@ -29,10 +29,10 @@ export default function Header() {
         <nav className="hidden md:flex items-center gap-6 text-sm text-slate-700" aria-label="Primary navigation">
           <a href="/" className="hover:text-[var(--theme-primary)] transition">Home</a>
           <a href="/about" className="hover:text-[var(--theme-primary)] transition">About</a>
-          <a href="/bookings" className="hover:text-[var(--theme-primary)] transition" aria-label="Bookings">Bookings</a>
+          <a href="/bookings" className="hover:text-[var(--theme-primary)] transition" aria-label="Bookings">My rides</a>
           {user ? (
             <>
-              {user.isAdmin && <a href="/admin" className="hover:text-[var(--theme-primary)]">Admin</a>}
+              {user.isAdmin && <a href="/admin" className="hover:text-[var(--theme-primary)]">Owner Console</a>}
               <button onClick={logout} className="ml-2 rounded-full border border-slate-200 px-4 py-2 text-sm">Logout</button>
             </>
           ) : (

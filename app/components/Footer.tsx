@@ -11,7 +11,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div>
             <div className="font-semibold text-[var(--theme-ink)]">LetsGo</div>
-            <div className="text-xs text-slate-600">Modern bus ticketing made delightful</div>
+            <div className="text-xs text-slate-600">Car booking marketplace for owners and passengers</div>
             <div className="mt-3 text-xs">© {new Date().getFullYear()} LetsGo. All rights reserved.</div>
           </div>
 

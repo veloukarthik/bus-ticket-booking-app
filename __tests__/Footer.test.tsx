@@ -7,7 +7,7 @@ describe('Footer component', () => {
   it('renders branding and legal links', () => {
     render(<Footer />);
 
-    expect(screen.getByText(/Modern bus ticketing made delightful/i)).toBeInTheDocument();
+    expect(screen.getByText(/Car booking marketplace for owners and passengers/i)).toBeInTheDocument();
     expect(screen.getByText(/Privacy/i)).toBeInTheDocument();
     expect(screen.getByText(/Terms/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/twitter/i)).toBeInTheDocument();

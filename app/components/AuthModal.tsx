@@ -13,6 +13,7 @@ export default function AuthModal({ open, onCloseAction, initial }: { open: bool
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [accountType, setAccountType] = useState<'CUSTOMER'|'OWNER'>('CUSTOMER');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmError, setConfirmError] = useState('');
@@ -66,7 +67,10 @@ export default function AuthModal({ open, onCloseAction, initial }: { open: bool
     try {
       const url = mode === 'login' ? '/api/auth/login' : '/api/auth/signup';
       const body: any = { email, password };
-      if (mode === 'signup') body.name = name;
+      if (mode === 'signup') {
+        body.name = name;
+        body.accountType = accountType;
+      }
       const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const data = await res.json();
       if (res.ok && data.token) {
@@ -74,7 +78,7 @@ export default function AuthModal({ open, onCloseAction, initial }: { open: bool
         // set user in provider (naive decode)
         try {
           const payload = JSON.parse(atob(data.token.split('.')[1]));
-          setUser({ id: payload.userId, email: payload.email, isAdmin: payload.isAdmin });
+          setUser({ id: payload.userId, email: payload.email, isAdmin: payload.isAdmin, userType: payload.userType });
         } catch (e) {}
         onCloseAction();
       } else {
@@ -112,6 +116,12 @@ export default function AuthModal({ open, onCloseAction, initial }: { open: bool
               <form onSubmit={submit} className="space-y-3">
                 {mode === 'signup' && (
                   <input aria-label="Full name" value={name} onChange={e=>setName(e.target.value)} placeholder="Full name" className="w-full border rounded px-3 py-2" />
+                )}
+                {mode === 'signup' && (
+                  <select aria-label="Account type" value={accountType} onChange={e=>setAccountType(e.target.value as 'CUSTOMER'|'OWNER')} className="w-full border rounded px-3 py-2">
+                    <option value="CUSTOMER">Customer (Book rides)</option>
+                    <option value="OWNER">Vehicle Owner (List rides)</option>
+                  </select>
                 )}
                 <input aria-label="Email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" className="w-full border rounded px-3 py-2" />
 

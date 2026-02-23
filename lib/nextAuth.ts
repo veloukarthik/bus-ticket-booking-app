@@ -27,6 +27,7 @@ export const authOptions: NextAuthOptions = {
             email: user.email,
             name: user.name ?? user.email.split("@")[0],
             password: hashed,
+            userType: "CUSTOMER",
           },
         });
       } else if (!existing.name && user.name) {
@@ -45,7 +46,8 @@ export const authOptions: NextAuthOptions = {
       token.appUserId = dbUser.id;
       token.appUserEmail = dbUser.email;
       token.appIsAdmin = dbUser.isAdmin;
-      token.appToken = signToken({ userId: dbUser.id, email: dbUser.email, isAdmin: dbUser.isAdmin });
+      token.appUserType = dbUser.userType;
+      token.appToken = signToken({ userId: dbUser.id, email: dbUser.email, isAdmin: dbUser.isAdmin, userType: dbUser.userType });
       return token;
     },
     async session({ session, token }) {
@@ -54,6 +56,7 @@ export const authOptions: NextAuthOptions = {
         id: typeof token.appUserId === "number" ? token.appUserId : undefined,
         email: (token.appUserEmail as string | undefined) ?? session.user?.email ?? undefined,
         isAdmin: Boolean(token.appIsAdmin),
+        userType: (token.appUserType as string | undefined) ?? undefined,
       };
       session.appToken = token.appToken as string | undefined;
       return session;

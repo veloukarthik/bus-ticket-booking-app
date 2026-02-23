@@ -8,6 +8,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
+  const [accountType, setAccountType] = useState<"CUSTOMER" | "OWNER">("CUSTOMER");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function SignupPage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const res = await fetch('/api/auth/signup', { method: 'POST', body: JSON.stringify({ name, email, password }), headers: { 'Content-Type': 'application/json' } });
+    const res = await fetch('/api/auth/signup', { method: 'POST', body: JSON.stringify({ name, email, password, accountType }), headers: { 'Content-Type': 'application/json' } });
     
     try {
       const data = await res.json();
@@ -40,6 +41,10 @@ export default function SignupPage() {
           <h1 className="text-2xl font-bold mb-4">Create account</h1>
           <form onSubmit={submit} className="flex flex-col gap-3">
             <input value={name} onChange={e=>setName(e.target.value)} placeholder="Full name" className="border p-2 rounded" />
+            <select value={accountType} onChange={e=>setAccountType(e.target.value as "CUSTOMER" | "OWNER")} className="border p-2 rounded">
+              <option value="CUSTOMER">Customer (Book rides)</option>
+              <option value="OWNER">Vehicle Owner (List rides)</option>
+            </select>
             <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" className="border p-2 rounded" />
             <div className="relative">
               <input value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" type={showPassword ? 'text' : 'password'} className="border p-2 rounded pr-10 w-full" />

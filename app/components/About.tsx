@@ -4,30 +4,30 @@ export default function About() {
       <div className="mx-auto max-w-6xl px-6">
         <h2 className="text-2xl font-bold text-slate-900">About LetsGo</h2>
 
-        <p className="mt-4 text-slate-600 max-w-3xl">LetsGo was created with one simple goal — to make bus travel easy, affordable, and accessible for everyone.</p>
+        <p className="mt-4 text-slate-600 max-w-3xl">LetsGo was created to connect vehicle owners and passengers through a simple car booking marketplace.</p>
 
         <div className="mt-6 space-y-6 max-w-4xl">
-          <p className="text-slate-700">We connect travelers with trusted bus operators across multiple cities, offering a smooth online booking experience with real-time availability, secure payments, and instant confirmation.</p>
-          <p className="text-slate-700">Whether you’re planning a weekend getaway or a long-distance journey, LetsGo helps you travel smarter.</p>
+          <p className="text-slate-700">We connect riders with trusted vehicle owners across multiple cities, with live availability, secure payments, and instant confirmations.</p>
+          <p className="text-slate-700">Whether it’s a daily commute or an intercity trip, LetsGo helps you find the right ride quickly.</p>
         </div>
 
         <div className="mt-10 grid gap-8 md:grid-cols-2">
           <div>
             <h3 className="text-lg font-semibold text-slate-900">Our Mission</h3>
-            <p className="mt-2 text-slate-600">To simplify bus ticket booking through technology and provide reliable travel experiences.</p>
+            <p className="mt-2 text-slate-600">To simplify car ride booking and empower vehicle owners with digital demand.</p>
           </div>
 
           <div>
             <h3 className="text-lg font-semibold text-slate-900">Our Vision</h3>
-            <p className="mt-2 text-slate-600">To become India’s most trusted online bus booking platform.</p>
+            <p className="mt-2 text-slate-600">To become India’s most trusted marketplace for owner-listed car rides.</p>
           </div>
         </div>
 
         <div className="mt-10">
           <h3 className="text-lg font-semibold text-slate-900">What We Offer</h3>
           <ul className="mt-3 list-inside list-disc space-y-2 text-slate-600">
-            <li>Fast &amp; simple ticket booking</li>
-            <li>Verified bus operators</li>
+            <li>Fast &amp; simple ride booking</li>
+            <li>Verified vehicle owners</li>
             <li>Best fare options</li>
             <li>Secure online payments</li>
             <li>24/7 customer support</li>
@@ -38,8 +38,8 @@ export default function About() {
           <h3 className="text-lg font-semibold text-slate-900">FAQ</h3>
           <div className="mt-4 space-y-3 text-slate-700">
             <div>
-              <p className="font-medium">How do I book a ticket on LetsGo?</p>
-              <p className="mt-1 text-slate-600">Enter your From, To, travel date, select your bus, choose seats, and complete payment.</p>
+              <p className="font-medium">How do I book a ride on LetsGo?</p>
+              <p className="mt-1 text-slate-600">Enter your From, To, travel date, select your ride, choose seats, and complete payment.</p>
             </div>
 
             <div>
@@ -48,8 +48,8 @@ export default function About() {
             </div>
 
             <div>
-              <p className="font-medium">Can I cancel my ticket?</p>
-              <p className="mt-1 text-slate-600">Yes. Cancellation depends on the operator’s policy. Refunds are processed as per terms.</p>
+              <p className="font-medium">Can I cancel my booking?</p>
+              <p className="mt-1 text-slate-600">Yes. Cancellation depends on the vehicle owner policy. Refunds are processed as per terms.</p>
             </div>
 
             <div>
@@ -76,7 +76,7 @@ export default function About() {
 
         <div className="mt-10">
           <h3 className="text-lg font-semibold text-slate-900">Terms &amp; Conditions (Short)</h3>
-          <p className="mt-2 text-slate-600">Tickets are subject to operator availability. Cancellation &amp; refund policies vary by operator. LetsGo acts as a booking platform, not a transport provider. Users must provide accurate booking information.</p>
+          <p className="mt-2 text-slate-600">Bookings are subject to owner availability. Cancellation &amp; refund policies vary by owner. LetsGo acts as a marketplace platform, not a transport provider. Users must provide accurate booking information.</p>
         </div>
 
         <div className="mt-10 pb-6">

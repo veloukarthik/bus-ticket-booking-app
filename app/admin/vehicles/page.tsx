@@ -26,7 +26,7 @@ export default function AdminVehicles() {
   return (
     <AdminGuard>
       <div className="mx-auto max-w-4xl px-6 py-12">
-        <h1 className="text-2xl font-bold">Vehicles</h1>
+        <h1 className="text-2xl font-bold">My Vehicles</h1>
         <div className="mt-4 grid gap-4">
           {vehicles.map(v => <div key={v.id} className="p-3 border">{v.name} — {v.number} — {v.capacity}</div>)}
         </div>

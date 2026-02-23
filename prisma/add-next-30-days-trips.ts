@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -44,11 +45,40 @@ function deterministicOffsetMinutes(seed: string): number {
 }
 
 async function ensureVehicles() {
+  const owner = await prisma.user.findFirst({
+    where: { isAdmin: true },
+    orderBy: { id: "asc" },
+  });
+  let ownerId = owner?.id;
+  if (!ownerId) {
+    const hashed = await bcrypt.hash("ownerpass123", 10);
+    const createdOwner = await prisma.user.create({
+      data: {
+        name: "Owner Admin",
+        email: `owner-${Date.now()}@letsgo.local`,
+        password: hashed,
+        isAdmin: true,
+        userType: "OWNER",
+      },
+    });
+    ownerId = createdOwner.id;
+  }
+
   const vehicles = await prisma.vehicle.findMany({ orderBy: { id: "asc" } });
-  if (vehicles.length > 0) return vehicles;
+  if (vehicles.length > 0) {
+    const needsOwner = vehicles.filter((v) => !v.ownerId);
+    if (needsOwner.length > 0) {
+      await prisma.vehicle.updateMany({
+        where: { ownerId: null },
+        data: { ownerId },
+      });
+      return prisma.vehicle.findMany({ orderBy: { id: "asc" } });
+    }
+    return vehicles;
+  }
 
   for (const vehicle of DEFAULT_VEHICLES) {
-    await prisma.vehicle.create({ data: vehicle });
+    await prisma.vehicle.create({ data: { ...vehicle, ownerId } });
   }
   return prisma.vehicle.findMany({ orderBy: { id: "asc" } });
 }

@@ -5,14 +5,23 @@ import Footer from "../components/Footer";
 
 export default function MyBookingsPage() {
   const [bookings, setBookings] = useState<any[]>([]);
+  const [isLoadingBookings, setIsLoadingBookings] = useState(true);
   const [loadingPayment, setLoadingPayment] = useState<number | null>(null);
+  const [submittingReview, setSubmittingReview] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'upcoming' | 'completed' | 'cancelled'>('upcoming');
 
   useEffect(()=>{ (async ()=>{
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/bookings?token='+token);
-    const data = await res.json();
-    setBookings(data.bookings || []);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/bookings?token='+token);
+      const data = await res.json();
+      setBookings(data.bookings || []);
+    } catch (error) {
+      console.error('Failed to fetch bookings', error);
+      setBookings([]);
+    } finally {
+      setIsLoadingBookings(false);
+    }
   })(); }, []);
 
   const filteredBookings = bookings.filter((b) => {
@@ -36,7 +45,7 @@ export default function MyBookingsPage() {
     <div className="min-h-screen bg-white text-slate-900 flex flex-col">
       <Header />
       <main className="flex-1 mx-auto max-w-4xl px-6 py-12 w-full">
-      <h1 className="text-2xl font-bold">My bookings</h1>
+      <h1 className="text-2xl font-bold">My ride bookings</h1>
 
       <div className="flex border-b border-slate-200 mt-6">
         {['upcoming', 'completed', 'cancelled'].map((tab) => (
@@ -53,7 +62,23 @@ export default function MyBookingsPage() {
       </div>
 
       <div className="mt-6 grid gap-4">
-        {filteredBookings.length === 0 ? (
+        {isLoadingBookings ? (
+          <>
+            {Array.from({ length: 4 }).map((_, idx) => (
+              <div key={`booking-skeleton-${idx}`} className="rounded border p-4 animate-pulse">
+                <div className="h-5 w-52 rounded bg-slate-200" />
+                <div className="mt-2 h-4 w-44 rounded bg-slate-200" />
+                <div className="mt-2 h-4 w-28 rounded bg-slate-200" />
+                <div className="mt-4 h-4 w-24 rounded bg-slate-200" />
+                <div className="mt-2 space-y-2">
+                  <div className="h-12 rounded bg-slate-100" />
+                  <div className="h-12 rounded bg-slate-100" />
+                </div>
+                <div className="mt-3 h-9 w-36 rounded bg-slate-200" />
+              </div>
+            ))}
+          </>
+        ) : filteredBookings.length === 0 ? (
           <p className="text-slate-500 py-4">No {activeTab} bookings found.</p>
         ) : filteredBookings.map(b=> {
           const tripDate = new Date(b.tripDate || b.trip.departure);
@@ -117,6 +142,52 @@ export default function MyBookingsPage() {
                 </div>
               )}
             </div>
+            {displayStatus === 'COMPLETED' && (
+              <div className="mt-3 border-t pt-3">
+                <div className="text-sm font-medium text-slate-700">Owner review</div>
+                {b.review ? (
+                  <div className="text-sm text-slate-600 mt-1">
+                    You rated {b.review.rating}/5 {b.review.comment ? `• "${b.review.comment}"` : ''}
+                  </div>
+                ) : (
+                  <div className="mt-2 flex items-center gap-2">
+                    <select id={`rating-${b.id}`} defaultValue="5" className="border rounded px-2 py-1 text-sm">
+                      <option value="5">5 - Excellent</option>
+                      <option value="4">4 - Good</option>
+                      <option value="3">3 - Average</option>
+                      <option value="2">2 - Poor</option>
+                      <option value="1">1 - Bad</option>
+                    </select>
+                    <button
+                      className="px-3 py-1.5 rounded bg-slate-900 text-white text-sm disabled:opacity-60"
+                      disabled={submittingReview === b.id}
+                      onClick={async () => {
+                        const ratingEl = document.getElementById(`rating-${b.id}`) as HTMLSelectElement | null;
+                        const rating = ratingEl ? Number(ratingEl.value) : 5;
+                        setSubmittingReview(b.id);
+                        try {
+                          const token = localStorage.getItem('token');
+                          const res = await fetch('/api/reviews', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                            body: JSON.stringify({ bookingId: b.id, rating }),
+                          });
+                          const data = await res.json();
+                          if (!res.ok) throw new Error(data?.error || 'Failed to submit review');
+                          setBookings(prev => prev.map(x => x.id === b.id ? { ...x, review: data.review } : x));
+                        } catch (err: any) {
+                          alert(err?.message || String(err));
+                        } finally {
+                          setSubmittingReview(null);
+                        }
+                      }}
+                    >
+                      {submittingReview === b.id ? 'Submitting...' : 'Submit review'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )})}
       </div>

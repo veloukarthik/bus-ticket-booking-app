@@ -8,8 +8,8 @@ describe('Services component', () => {
     render(<Services />);
 
     expect(screen.getByText(/What we offer/i)).toBeInTheDocument();
-    expect(screen.getByText(/Online Booking/i)).toBeInTheDocument();
-    expect(screen.getByText(/Fleet Management/i)).toBeInTheDocument();
-    expect(screen.getByText(/Analytics/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Ride Booking/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Owner Console/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Demand Insights/i })).toBeInTheDocument();
   });
 });

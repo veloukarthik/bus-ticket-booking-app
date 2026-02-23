@@ -33,13 +33,13 @@ export default function AdminTrips() {
   return (
     <AdminGuard>
       <div className="mx-auto max-w-6xl px-6 py-12">
-        <h1 className="text-2xl font-bold">Trips</h1>
+        <h1 className="text-2xl font-bold">My Rides</h1>
         <div className="mt-4 grid gap-4">
           {trips.map(t => <div key={t.id} className="p-3 border">{t.source} → {t.destination} — ₹{t.price}</div>)}
         </div>
 
         <div className="mt-6">
-          <h2 className="font-semibold">Create trip</h2>
+          <h2 className="font-semibold">Create ride</h2>
           <div className="mt-2 grid grid-cols-2 gap-2">
             <select value={vehicleId ?? ''} onChange={e=>setVehicleId(Number(e.target.value)||null)} className="border p-2">
               <option value="">Select vehicle</option>
@@ -51,7 +51,7 @@ export default function AdminTrips() {
             <input value={arrival} onChange={e=>setArrival(e.target.value)} placeholder="Arrival ISO" className="border p-2" />
             <input value={price} onChange={e=>setPrice(Number(e.target.value))} placeholder="Price" type="number" className="border p-2" />
             <div className="col-span-2 text-right">
-              <button onClick={create} className="rounded bg-[var(--theme-primary)] px-4 py-2 text-white">Create trip</button>
+              <button onClick={create} className="rounded bg-[var(--theme-primary)] px-4 py-2 text-white">Create ride</button>
             </div>
           </div>
         </div>

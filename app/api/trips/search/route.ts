@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
   try {
-    const { source, destination, date } = await req.json();
+    const { source, destination, date, sortBy } = await req.json();
     const src = String(source || '').trim();
     const dst = String(destination || '').trim();
 
@@ -51,11 +51,57 @@ export async function POST(req: Request) {
 
     const trips = await prisma.trip.findMany({
       where,
-      include: { vehicle: true },
+      include: { vehicle: { include: { owner: { select: { id: true, name: true } } } } },
       orderBy: { departure: 'asc' },
     });
 
-    return NextResponse.json({ trips });
+    const ownerIds = Array.from(new Set(trips.map((t) => t.vehicle.ownerId).filter(Boolean))) as number[];
+    const reviewGroups = ownerIds.length > 0
+      ? await prisma.review.groupBy({
+          by: ["ownerId"],
+          where: { ownerId: { in: ownerIds } },
+          _avg: { rating: true },
+          _count: { _all: true },
+        })
+      : [];
+
+    const reviewMap = new Map<number, { avg: number; count: number }>();
+    reviewGroups.forEach((g) => {
+      reviewMap.set(g.ownerId, {
+        avg: Number(g._avg.rating || 0),
+        count: g._count._all || 0,
+      });
+    });
+
+    const enrichedTrips = trips.map((t) => {
+      const ownerId = t.vehicle.ownerId || 0;
+      const review = reviewMap.get(ownerId);
+      return {
+        ...t,
+        owner: t.vehicle.owner ? { id: t.vehicle.owner.id, name: t.vehicle.owner.name } : null,
+        ownerRating: review ? Number(review.avg.toFixed(1)) : null,
+        ownerReviewCount: review?.count || 0,
+      };
+    });
+
+    const normalizedSort = String(sortBy || "price").toLowerCase();
+    const sortedTrips = [...enrichedTrips].sort((a, b) => {
+      if (normalizedSort === "rating") {
+        const ar = a.ownerRating ?? -1;
+        const br = b.ownerRating ?? -1;
+        if (br !== ar) return br - ar;
+        if (a.price !== b.price) return a.price - b.price;
+        return new Date(a.departure).getTime() - new Date(b.departure).getTime();
+      }
+
+      if (a.price !== b.price) return a.price - b.price;
+      const ar = a.ownerRating ?? -1;
+      const br = b.ownerRating ?? -1;
+      if (br !== ar) return br - ar;
+      return new Date(a.departure).getTime() - new Date(b.departure).getTime();
+    });
+
+    return NextResponse.json({ trips: sortedTrips });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }

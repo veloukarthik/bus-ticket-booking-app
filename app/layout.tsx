@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LetsGo - Modern Bus Ticketing",
-  description: "LetsGo: modern ticketing, fleet and analytics for bus operators.",
+  title: "LetsGo - Car Booking Marketplace",
+  description: "LetsGo connects vehicle owners and passengers for fast, secure ride bookings.",
 };
 
 export default function RootLayout({

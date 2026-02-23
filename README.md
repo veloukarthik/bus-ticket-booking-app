@@ -37,6 +37,26 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Marketplace Mode
+
+LetsGo is configured as a car-booking marketplace:
+
+- `CUSTOMER` accounts can search rides and book seats.
+- `OWNER` accounts can access the owner console (`/admin`) to manage vehicles and rides.
+- Search results support `Lowest fare` and `Top rated owners` sorting, with owner rating + review count.
+- Customers can submit owner reviews from completed bookings.
+
+Apply migrations after pulling latest changes:
+
+```bash
+npx prisma migrate deploy --schema=prisma/schema.prisma
+```
+
+## License
+
+This project is distributed under a proprietary commercial license.
+See `LICENSE` for terms.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

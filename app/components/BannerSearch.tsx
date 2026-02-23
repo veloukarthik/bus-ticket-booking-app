@@ -77,10 +77,10 @@ export default function BannerSearch() {
 
   return (
     <div className="mx-auto max-w-4xl fade-in-up">
-      <form
+    <form
         onSubmit={onSearch}
         role="search"
-        aria-label="Search buses"
+        aria-label="Search rides"
         className="premium-panel p-4 sm:p-5 flex flex-col sm:flex-row gap-2 sm:gap-3 items-center"
       >
         {/* Source select (falls back to text input if no locations) */}
@@ -114,7 +114,7 @@ export default function BannerSearch() {
         ))}
 
       <input aria-label="Date" value={date} min={today} onChange={e=>setDate(e.target.value)} type="date" className="border border-slate-200 bg-white px-3 py-2 rounded-xl outline-none focus:border-[var(--theme-highlight)] focus:ring-2 focus:ring-amber-100" />
-        <button type="submit" className="rounded-xl bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-accent)] px-5 py-2 text-white font-medium shadow-[0_10px_24px_rgba(14,165,233,0.24)] hover:brightness-95">Search buses</button>
+        <button type="submit" className="rounded-xl bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-accent)] px-5 py-2 text-white font-medium shadow-[0_10px_24px_rgba(14,165,233,0.24)] hover:brightness-95">Search rides</button>
       </form>
       {formError && (
         <div className="error-panel mt-3 px-4 py-3 text-sm font-medium" role="alert" aria-live="polite">

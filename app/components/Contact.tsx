@@ -3,7 +3,7 @@ export default function Contact() {
     <section id="contact" className="py-16 bg-slate-50">
       <div className="mx-auto max-w-6xl px-6">
         <h2 className="text-2xl font-bold text-slate-900">Get in touch</h2>
-        <p className="mt-2 text-slate-600 max-w-2xl">Fill in the form or email us to schedule a demo.</p>
+        <p className="mt-2 text-slate-600 max-w-2xl">Owners and passengers can reach us for onboarding, booking support, and partnership queries.</p>
 
         <form className="mt-6 max-w-2xl">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

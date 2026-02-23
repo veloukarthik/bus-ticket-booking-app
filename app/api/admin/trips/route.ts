@@ -8,7 +8,10 @@ export async function GET(req: Request) {
     const admin = requireAdminFromToken(token);
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const trips = await prisma.trip.findMany({ include: { vehicle: true } });
+    const trips = await prisma.trip.findMany({
+      where: { vehicle: { is: { ownerId: Number(admin.userId) } } },
+      include: { vehicle: true },
+    });
     return NextResponse.json({ trips });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || "Unauthorized" }, { status: 401 });
@@ -22,6 +25,12 @@ export async function POST(req: Request) {
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { vehicleId, source, destination, departure, arrival, price } = await req.json();
+    const ownerVehicle = await prisma.vehicle.findFirst({
+      where: { id: Number(vehicleId), ownerId: Number(admin.userId) },
+      select: { id: true },
+    });
+    if (!ownerVehicle) return NextResponse.json({ error: "Vehicle not found for this owner" }, { status: 404 });
+
     const t = await prisma.trip.create({ data: { vehicleId: Number(vehicleId), source, destination, departure: new Date(departure), arrival: new Date(arrival), price: Number(price) } });
     return NextResponse.json({ trip: t });
   } catch (err: any) {

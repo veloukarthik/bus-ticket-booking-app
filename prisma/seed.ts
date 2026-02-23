@@ -25,12 +25,18 @@ async function main() {
   ];
 
   const now = new Date();
+  // Create an owner/admin user
+  const hashed = await bcrypt.hash("adminpass", 10);
+  const owner = await prisma.user.create({
+    data: { name: "Owner Admin", email: "admin@example.com", password: hashed, isAdmin: true, userType: "OWNER" },
+  });
+
   // create vehicles and multiple trips for each vehicle across the next 3 days
   let totalVehicles = 0;
   let totalTrips = 0;
 
   for (const v of vehiclesData) {
-    const vehicle = await prisma.vehicle.create({ data: v });
+    const vehicle = await prisma.vehicle.create({ data: { ...v, ownerId: owner.id } });
     totalVehicles++;
 
     const tripCreates: Promise<any>[] = [];
@@ -67,10 +73,6 @@ async function main() {
     const createdTrips = await Promise.all(tripCreates);
     totalTrips += createdTrips.length;
   }
-
-  // Create an admin user
-  const hashed = await bcrypt.hash("adminpass", 10);
-  await prisma.user.create({ data: { name: "Admin", email: "admin@example.com", password: hashed, isAdmin: true } });
 
   console.log(`Seeded ${totalVehicles} vehicles and ${totalTrips} trips.`);
 }

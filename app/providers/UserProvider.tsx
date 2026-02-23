@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { getSession, SessionProvider, signOut } from "next-auth/react";
 
-type User = { id: number; email: string; name?: string; isAdmin?: boolean } | null;
+type User = { id: number; email: string; name?: string; isAdmin?: boolean; userType?: 'OWNER'|'CUSTOMER'|string } | null;
 
 const UserContext = createContext<{ user: User; setUser: (u: User) => void; logout: () => void }>({ user: null, setUser: () => {}, logout: () => {} });
 
@@ -12,7 +12,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   function hydrateUserFromToken(token: string) {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      setUser({ id: payload.userId, email: payload.email, isAdmin: payload.isAdmin });
+      setUser({ id: payload.userId, email: payload.email, isAdmin: payload.isAdmin, userType: payload.userType });
       return true;
     } catch {
       return false;

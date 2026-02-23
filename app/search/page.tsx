@@ -14,10 +14,12 @@ function SearchContent() {
   const [source, setSource] = useState('');
   const [destination, setDestination] = useState('');
   const [date, setDate] = useState(today);
+  const [sortBy, setSortBy] = useState<'price' | 'rating'>('price');
   const [trips, setTrips] = useState<any[]>([]);
   const [sources, setSources] = useState<string[]>([]);
   const [destinations, setDestinations] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
   const [formError, setFormError] = useState('');
   const [passengerSuggestions, setPassengerSuggestions] = useState<{ name: string; mobile: string; gender: string; age: number | null }[]>([]);
   const router = useRouter();
@@ -33,11 +35,12 @@ function SearchContent() {
     return "";
   }
 
-  async function doSearch(formEvent?: React.FormEvent, opts?: { source?: string; destination?: string; date?: string; skipUrlSync?: boolean }) {
+  async function doSearch(formEvent?: React.FormEvent, opts?: { source?: string; destination?: string; date?: string; sortBy?: 'price'|'rating'; skipUrlSync?: boolean }) {
     if (formEvent) formEvent.preventDefault();
     const s = (opts?.source ?? source).trim();
     const d = (opts?.destination ?? destination).trim();
     const dt = opts?.date ?? date;
+    const sort = opts?.sortBy ?? sortBy;
     const validationError = validateSearchInputs(s, d, dt);
     if (validationError) {
       setTrips([]);
@@ -45,9 +48,10 @@ function SearchContent() {
       return;
     }
     setFormError('');
+    setHasSearched(true);
     setLoading(true);
     try {
-      const res = await fetch('/api/trips/search', { method: 'POST', body: JSON.stringify({ source: s, destination: d, date: dt }), headers: { 'Content-Type': 'application/json' } });
+      const res = await fetch('/api/trips/search', { method: 'POST', body: JSON.stringify({ source: s, destination: d, date: dt, sortBy: sort }), headers: { 'Content-Type': 'application/json' } });
       const data = await res.json();
       if (!res.ok) {
         setTrips([]);
@@ -56,7 +60,7 @@ function SearchContent() {
         setTrips(data.trips || []);
       }
       if (!opts?.skipUrlSync) {
-        const params = new URLSearchParams({ source: s, destination: d, date: dt });
+        const params = new URLSearchParams({ source: s, destination: d, date: dt, sortBy: sort });
         router.replace(`/search?${params.toString()}`);
       }
     } catch (e) {
@@ -89,17 +93,20 @@ function SearchContent() {
     const s = searchParams.get('source');
     const d = searchParams.get('destination');
     const dt = searchParams.get('date');
+    const sort = searchParams.get('sortBy');
     if (s) setSource(s);
     if (d) setDestination(d);
     if (dt) setDate(dt);
+    if (sort === 'price' || sort === 'rating') setSortBy(sort);
     if (s && d) {
       // run search with provided params
-      doSearch(undefined, { source: s, destination: d, date: dt ?? new Date().toISOString().slice(0,10), skipUrlSync: true });
+      doSearch(undefined, { source: s, destination: d, date: dt ?? new Date().toISOString().slice(0,10), sortBy: (sort === 'rating' ? 'rating' : 'price'), skipUrlSync: true });
     }
   }, [searchParams?.toString()]);
 
   const [selectingTrip, setSelectingTrip] = useState<number | null>(null);
   const [bookedPassengers, setBookedPassengers] = useState<any[]>([]);
+  const selectedTrip = selectingTrip ? trips.find((t) => t.id === selectingTrip) : null;
 
   useEffect(() => {
     if (selectingTrip) {
@@ -200,10 +207,10 @@ function SearchContent() {
 
   return (
     <>
-      <h1 className="text-3xl font-bold text-[var(--theme-ink)]">Search trips</h1>
-      <p className="mt-1 text-sm text-slate-600">Pick a route and date to view premium buses and fares.</p>
+      <h1 className="text-3xl font-bold text-[var(--theme-ink)]">Search rides</h1>
+      <p className="mt-1 text-sm text-slate-600">Pick a route and date to view available cars and fares.</p>
 
-      <form onSubmit={doSearch} role="search" aria-label="Search trips" className="premium-panel mt-5 flex flex-col sm:flex-row gap-3 p-4">
+      <form onSubmit={doSearch} role="search" aria-label="Search rides" className="premium-panel mt-5 flex flex-col sm:flex-row gap-3 p-4">
         <select aria-label="From" value={source} onChange={e=>setSource(e.target.value)} className="flex-1 border border-slate-200 bg-white px-3 py-2 rounded-xl outline-none focus:border-[var(--theme-primary)] focus:ring-2 focus:ring-sky-100">
           <option value="">From</option>
           {sources.map((s) => (
@@ -219,7 +226,16 @@ function SearchContent() {
             ))}
         </select>
         <input aria-label="Date" min={today} type="date" value={date} onChange={e=>setDate(e.target.value)} className="border border-slate-200 bg-white px-3 py-2 rounded-xl outline-none focus:border-[var(--theme-highlight)] focus:ring-2 focus:ring-amber-100" />
-        <button className="rounded-xl bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-accent)] px-5 py-2 text-white font-medium shadow-[0_10px_24px_rgba(14,165,233,0.24)] hover:brightness-95 disabled:opacity-60" disabled={loading}>{loading ? 'Searching...' : 'Search'}</button>
+        <select aria-label="Sort rides" value={sortBy} onChange={e=>setSortBy(e.target.value as 'price'|'rating')} className="border border-slate-200 bg-white px-3 py-2 rounded-xl outline-none focus:border-[var(--theme-primary)] focus:ring-2 focus:ring-sky-100">
+          <option value="price">Lowest fare</option>
+          <option value="rating">Top rated owners</option>
+        </select>
+        <button className="rounded-xl bg-gradient-to-r from-[var(--theme-primary)] to-[var(--theme-accent)] px-5 py-2 text-white font-medium shadow-[0_10px_24px_rgba(14,165,233,0.24)] hover:brightness-95 disabled:opacity-60 inline-flex items-center justify-center gap-2" disabled={loading}>
+          {loading && (
+            <span className="h-4 w-4 rounded-full border-2 border-white/60 border-t-white animate-spin" aria-hidden="true" />
+          )}
+          {loading ? 'Searching...' : 'Search'}
+        </button>
       </form>
       {formError && (
         <div className="error-panel mt-3 px-4 py-3 text-sm font-medium" role="alert" aria-live="polite">
@@ -228,11 +244,36 @@ function SearchContent() {
       )}
 
       <div className="mt-6 grid gap-4">
+        {loading && (
+          <>
+            {Array.from({ length: 4 }).map((_, idx) => (
+              <div key={`search-skeleton-${idx}`} className="premium-panel p-4 animate-pulse">
+                <div className="h-5 w-44 rounded bg-slate-200" />
+                <div className="mt-3 h-4 w-56 rounded bg-slate-200" />
+                <div className="mt-2 h-3 w-64 rounded bg-slate-200" />
+                <div className="mt-2 h-3 w-52 rounded bg-slate-200" />
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="h-6 w-20 rounded bg-slate-200" />
+                  <div className="h-9 w-24 rounded-xl bg-slate-200" />
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+        {!loading && hasSearched && trips.length === 0 && !formError && (
+          <div className="premium-panel p-4 text-sm text-slate-600">No rides found for the selected route/date.</div>
+        )}
         {trips.map(t=> (
           <div key={t.id} className="premium-panel p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <div className="font-semibold text-[var(--theme-ink)]">{t.source} → {t.destination}</div>
               <div className="text-sm text-slate-600">Departs: {new Date(t.departure).toLocaleString()}</div>
+              <div className="mt-1 text-xs text-slate-600">
+                Cab: {t.vehicle?.name || 'Vehicle'} ({t.vehicle?.number || 'N/A'}) • Seats: {t.vehicle?.capacity ?? '--'}
+              </div>
+              <div className="mt-1 text-xs text-slate-600">
+                Owner: {t.owner?.name || 'Verified Owner'} • Rating: {t.ownerRating ?? 'New'} {t.ownerReviewCount ? `(${t.ownerReviewCount} reviews)` : '(no reviews yet)'}
+              </div>
             </div>
             <div className="flex items-center justify-between sm:justify-start gap-4">
               <div className="font-semibold text-[var(--theme-ink)]">₹{t.price}</div>
@@ -248,6 +289,9 @@ function SearchContent() {
             <h3 className="font-semibold text-lg">Select seats</h3>
             <SeatSelector
               onConfirmAction={(passengers: any[]) => createBooking(selectingTrip, passengers)}
+              rows={Math.max(1, Math.ceil(Number(selectedTrip?.vehicle?.capacity || 3) / 3))}
+              totalSeats={Math.max(1, Number(selectedTrip?.vehicle?.capacity || 3))}
+              vehicleLabel={String(selectedTrip?.vehicle?.name || "")}
               bookedPassengers={bookedPassengers as any}
               passengerSuggestions={passengerSuggestions}
             />

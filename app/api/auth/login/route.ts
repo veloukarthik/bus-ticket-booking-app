@@ -13,6 +13,9 @@ export async function POST(req: Request) {
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) return NextResponse.json({ error: "Invalid" }, { status: 401 });
 
-  const token = signToken({ userId: user.id, email: user.email, isAdmin: user.isAdmin });
-  return NextResponse.json({ token, user: { id: user.id, email: user.email, name: user.name } });
+  const token = signToken({ userId: user.id, email: user.email, isAdmin: user.isAdmin, userType: user.userType });
+  return NextResponse.json({
+    token,
+    user: { id: user.id, email: user.email, name: user.name, userType: user.userType, isAdmin: user.isAdmin },
+  });
 }

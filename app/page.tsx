@@ -23,16 +23,16 @@ export default function Home() {
           <h2 id="why-choose" className="text-2xl font-semibold mb-4">Why Choose LetsGo?</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="p-4 bg-white rounded shadow-sm">
-              <h3 className="font-semibold">Simple & Fast Booking</h3>
-              <p className="mt-2 text-sm text-slate-600">Book tickets in under a minute with our easy-to-use platform.</p>
+              <h3 className="font-semibold">Book Cars Quickly</h3>
+              <p className="mt-2 text-sm text-slate-600">Find and reserve available rides in under a minute.</p>
             </div>
             <div className="p-4 bg-white rounded shadow-sm">
-              <h3 className="font-semibold">Best Price Guarantee</h3>
-              <p className="mt-2 text-sm text-slate-600">Compare multiple operators and get the most affordable fares.</p>
+              <h3 className="font-semibold">Owner-Driven Marketplace</h3>
+              <p className="mt-2 text-sm text-slate-600">Vehicle owners list routes and customers book directly.</p>
             </div>
             <div className="p-4 bg-white rounded shadow-sm">
               <h3 className="font-semibold">Safe & Reliable</h3>
-              <p className="mt-2 text-sm text-slate-600">Travel with verified buses and professional drivers.</p>
+              <p className="mt-2 text-sm text-slate-600">Travel with verified vehicles and trusted owner partners.</p>
             </div>
             <div className="p-4 bg-white rounded shadow-sm">
               <h3 className="font-semibold">Secure Payments</h3>
@@ -40,7 +40,11 @@ export default function Home() {
             </div>
             <div className="p-4 bg-white rounded shadow-sm">
               <h3 className="font-semibold">Real-Time Availability</h3>
-              <p className="mt-2 text-sm text-slate-600">Live seat availability and instant confirmation.</p>
+              <p className="mt-2 text-sm text-slate-600">Live seat availability across listed cars and routes.</p>
+            </div>
+            <div className="p-4 bg-white rounded shadow-sm">
+              <h3 className="font-semibold">Owner Console</h3>
+              <p className="mt-2 text-sm text-slate-600">Owners can add vehicles and publish routes in minutes.</p>
             </div>
             <div className="p-4 bg-white rounded shadow-sm">
               <h3 className="font-semibold">24/7 Support</h3>
@@ -51,7 +55,7 @@ export default function Home() {
 
         {/* Popular Routes */}
         <section className="mb-8 px-2" aria-labelledby="popular-routes">
-          <h2 id="popular-routes" className="text-2xl font-semibold mb-4">Popular Routes</h2>
+          <h2 id="popular-routes" className="text-2xl font-semibold mb-4">Popular Car Routes</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {[
               'Chennai → Bangalore',
@@ -70,7 +74,7 @@ export default function Home() {
           <h2 id="testimonials" className="text-2xl font-semibold mb-4">What Our Customers Say</h2>
           <div className="space-y-4">
             <blockquote className="p-4 bg-white rounded shadow-sm">“Super easy booking experience and great prices!” — <span className="font-semibold">Arun</span></blockquote>
-            <blockquote className="p-4 bg-white rounded shadow-sm">“Clean buses and instant confirmation. Loved LetsGo.” — <span className="font-semibold">Priya</span></blockquote>
+            <blockquote className="p-4 bg-white rounded shadow-sm">“Clean cars and instant confirmation. Loved LetsGo.” — <span className="font-semibold">Priya</span></blockquote>
             <blockquote className="p-4 bg-white rounded shadow-sm">“Best platform for last-minute travel.” — <span className="font-semibold">Karthik</span></blockquote>
           </div>
         </section>
@@ -81,7 +85,7 @@ export default function Home() {
           <ol className="list-decimal list-inside space-y-2 text-slate-700">
             <li>Enter your source and destination</li>
             <li>Choose travel date</li>
-            <li>Select your preferred bus & seat</li>
+            <li>Select your preferred car & seat</li>
             <li>Pay securely</li>
             <li>Get instant confirmation</li>
           </ol>

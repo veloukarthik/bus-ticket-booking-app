@@ -17,6 +17,7 @@
     "prisma:studio": "prisma studio",
     "seed": "ts-node --transpile-only --compiler-options \"{\\\"module\\\":\\\"commonjs\\\",\\\"moduleResolution\\\":\\\"node\\\"}\" prisma/seed.ts",
     "seed:trips:30d": "ts-node --transpile-only --compiler-options \"{\\\"module\\\":\\\"commonjs\\\",\\\"moduleResolution\\\":\\\"node\\\"}\" prisma/add-next-30-days-trips.ts",
+    "seed:marketplace": "ts-node --transpile-only --compiler-options \"{\\\"module\\\":\\\"commonjs\\\",\\\"moduleResolution\\\":\\\"node\\\"}\" prisma/seed-marketplace-data.ts",
     "test:password": "ts-node scripts/test-password.ts"
   },
   "dependencies": {

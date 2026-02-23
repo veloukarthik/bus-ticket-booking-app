@@ -25,7 +25,7 @@ export async function GET(req: Request) {
   try {
     const bookings = await (prisma as any).booking.findMany({
       where: { userId },
-      include: { trip: true, passengers: true },
+      include: { trip: { include: { vehicle: { include: { owner: { select: { id: true, name: true } } } } } }, passengers: true, review: true },
       orderBy: { createdAt: 'desc' }
     });
     return NextResponse.json({ bookings });

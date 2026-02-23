@@ -7,7 +7,7 @@ export async function GET(req: Request) {
   const admin = requireAdminFromToken(token);
   if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const vehicles = await prisma.vehicle.findMany();
+  const vehicles = await prisma.vehicle.findMany({ where: { ownerId: Number(admin.userId) } });
   return NextResponse.json({ vehicles });
 }
 
@@ -17,6 +17,8 @@ export async function POST(req: Request) {
   if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { name, number, capacity } = await req.json();
-  const v = await prisma.vehicle.create({ data: { name, number, capacity: Number(capacity) || 0 } });
+  const v = await prisma.vehicle.create({
+    data: { name, number, capacity: Number(capacity) || 0, ownerId: Number(admin.userId) },
+  });
   return NextResponse.json({ vehicle: v });
 }
