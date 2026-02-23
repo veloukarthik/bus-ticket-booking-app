@@ -1,11 +1,17 @@
 export default function Footer() {
   return (
-    <footer className="border-t border-slate-100 py-10" style={{ background: 'linear-gradient(90deg, rgba(14,165,233,0.03), rgba(47,191,113,0.02))' }}>
-      <div className="mx-auto max-w-6xl px-6 text-sm text-slate-600">
+    <footer
+      className="border-t border-slate-200/70 py-10"
+      style={{
+        background:
+          "radial-gradient(120% 160% at 0% 100%, rgba(14,165,233,0.20), transparent 40%), radial-gradient(120% 160% at 100% 0%, rgba(47,191,113,0.18), transparent 42%), linear-gradient(120deg, #eaf7ff 0%, #f7fff5 65%, #fff9ec 100%)",
+      }}
+    >
+      <div className="mx-auto max-w-6xl px-6 text-sm text-slate-700">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div>
-            <div className="font-semibold">LetsGo</div>
-            <div className="text-xs text-[var(--muted)]">Modern bus ticketing made delightful</div>
+            <div className="font-semibold text-[var(--theme-ink)]">LetsGo</div>
+            <div className="text-xs text-slate-600">Modern bus ticketing made delightful</div>
             <div className="mt-3 text-xs">© {new Date().getFullYear()} LetsGo. All rights reserved.</div>
           </div>
 

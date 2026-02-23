@@ -4,24 +4,33 @@ import { prisma } from '@/lib/prisma';
 export async function POST(req: Request) {
   try {
     const { source, destination, date } = await req.json();
+    const src = String(source || '').trim();
+    const dst = String(destination || '').trim();
+
+    if (!src || !dst) {
+      return NextResponse.json({ error: 'Source and destination are required' }, { status: 400 });
+    }
 
     // Prevent searches where source and destination are identical
-    if (source && destination) {
-      const a = String(source).trim().toLowerCase();
-      const b = String(destination).trim().toLowerCase();
-      if (a && b && a === b) {
-        return NextResponse.json({ error: 'Source and destination cannot be the same' }, { status: 400 });
-      }
+    if (src.toLowerCase() === dst.toLowerCase()) {
+      return NextResponse.json({ error: 'Source and destination cannot be the same' }, { status: 400 });
+    }
+
+    const locations = await prisma.trip.findMany({ select: { source: true, destination: true } });
+    const validCities = new Set<string>();
+    locations.forEach((row) => {
+      if (row.source) validCities.add(row.source.trim().toLowerCase());
+      if (row.destination) validCities.add(row.destination.trim().toLowerCase());
+    });
+
+    if (!validCities.has(src.toLowerCase()) || !validCities.has(dst.toLowerCase())) {
+      return NextResponse.json({ error: 'Please select valid source and destination from available cities' }, { status: 400 });
     }
 
     const where: any = {};
 
-    if (source) {
-      where.source = { contains: source, mode: 'insensitive' };
-    }
-    if (destination) {
-      where.destination = { contains: destination, mode: 'insensitive' };
-    }
+    where.source = { equals: src, mode: 'insensitive' };
+    where.destination = { equals: dst, mode: 'insensitive' };
 
     if (date) {
       // Filter by date range (start of day to end of day)

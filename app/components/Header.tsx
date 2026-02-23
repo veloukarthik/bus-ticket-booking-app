@@ -10,10 +10,16 @@ export default function Header() {
   const [authMode, setAuthMode] = useState<'login'|'signup'>('login');
 
   return (
-    <header className="w-full bg-gradient-to-r from-[rgba(14,165,233,0.06)] to-[rgba(47,191,113,0.03)] backdrop-blur-sm border-b border-gray-100">
+    <header
+      className="w-full backdrop-blur-sm border-b border-sky-100/70"
+      style={{
+        background:
+          "radial-gradient(120% 180% at 0% 0%, rgba(14,165,233,0.14), transparent 42%), radial-gradient(120% 180% at 100% 100%, rgba(47,191,113,0.12), transparent 42%), linear-gradient(90deg, rgba(255,255,255,0.96), rgba(238,248,255,0.92))",
+      }}
+    >
       <div className="mx-auto max-w-6xl px-6 py-5 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-1" aria-label="Homepage">
-          <img src="/letsgo.png" alt="LetsGo" className="h-20 w-40" />
+          <img src="/letsgo.png" alt="LetsGo" className="h-14 w-28 sm:h-20 sm:w-40" />
           {/* <div>
             <div className="font-semibold text-lg text-slate-800">LetsGo</div>
             <div className="text-xs text-[var(--muted)]">Premium Bus Tickets</div>

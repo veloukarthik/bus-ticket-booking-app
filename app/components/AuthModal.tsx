@@ -95,9 +95,9 @@ export default function AuthModal({ open, onCloseAction, initial }: { open: bool
   }
 
   const content = (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center" role="dialog" aria-modal="true" aria-label={mode === 'login' ? 'Login dialog' : 'Sign up dialog'}>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4" role="dialog" aria-modal="true" aria-label={mode === 'login' ? 'Login dialog' : 'Sign up dialog'}>
       <div className="absolute inset-0 bg-black/50" onClick={onCloseAction} aria-hidden="true"></div>
-        <div className="relative w-full max-w-3xl bg-white rounded-lg shadow-2xl fade-in-up transform-gpu overflow-hidden">
+        <div className="relative w-full max-w-3xl bg-white rounded-lg shadow-2xl fade-in-up transform-gpu overflow-hidden max-h-[92vh] overflow-y-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 min-h-[360px]">
             {/* Left: banner image */}
             <div className="hidden sm:block bg-cover bg-center" style={{ backgroundImage: `url('/banner.png')` }} aria-hidden="true"></div>

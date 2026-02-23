@@ -3,13 +3,16 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-  /* theme inspired by banner: blues, greens and soft pink */
-  --theme-primary: #0ea5e9; /* sky blue */
-  --theme-accent: #2fbf71; /* green */
-  --theme-highlight: #ffb6c1; /* soft pink */
+  /* logo-aligned premium palette */
+  --theme-primary: #0ea5e9; /* aqua blue */
+  --theme-accent: #2fbf71; /* fresh green */
+  --theme-highlight: #fdb022; /* warm golden accent */
+  --theme-ink: #0f172a; /* deep navy */
+  --theme-mist: #eef8ff;
   --card-bg: rgba(255,255,255,0.8);
   --muted: #6b7280;
   --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --shadow-premium: 0 18px 48px rgba(14, 165, 233, 0.18);
 }
 
 @theme inline {
@@ -36,6 +39,23 @@ body {
 .card {
   background: var(--card-bg);
   box-shadow: var(--shadow-md);
+  border-radius: 12px;
+}
+
+.premium-panel {
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(14,165,233,0.12), transparent 42%),
+    radial-gradient(120% 140% at 100% 100%, rgba(47,191,113,0.14), transparent 42%),
+    #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-premium);
+  border-radius: 16px;
+}
+
+.error-panel {
+  border: 1px solid #fecaca;
+  background: linear-gradient(180deg, #fff5f5 0%, #fff1f2 100%);
+  color: #b42318;
   border-radius: 12px;
 }
 
