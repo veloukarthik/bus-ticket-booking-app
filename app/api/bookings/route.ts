@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 
-function getUserFromRequest(req: Request) {
+function getAuthContext(req: Request) {
   const url = new URL(req.url);
   let token = url.searchParams.get('token');
   
@@ -14,17 +14,18 @@ function getUserFromRequest(req: Request) {
   }
 
   if (!token) return null;
-  const payload = verifyToken(token);
-  return payload ? payload.userId : null;
+  const payload = verifyToken(token) as any;
+  if (!payload?.userId || !payload?.organizationId) return null;
+  return { userId: Number(payload.userId), organizationId: Number(payload.organizationId) };
 }
 
 export async function GET(req: Request) {
-  const userId = getUserFromRequest(req);
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const auth = getAuthContext(req);
+  if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
     const bookings = await (prisma as any).booking.findMany({
-      where: { userId },
+      where: { userId: auth.userId, organizationId: auth.organizationId },
       include: { trip: true, passengers: true },
       orderBy: { createdAt: 'desc' }
     });
@@ -35,8 +36,8 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const userId = getUserFromRequest(req);
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const auth = getAuthContext(req);
+  if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
     let body: any;
@@ -59,6 +60,7 @@ export async function POST(req: Request) {
     const existing = await prisma.booking.findMany({
       where: {
         tripId: Number(tripId),
+        organizationId: auth.organizationId,
         status: { in: ['CONFIRMED', 'PENDING'] }
       },
       select: { seats: true }
@@ -83,7 +85,13 @@ export async function POST(req: Request) {
     try {
       if (prisma && (prisma as any).passenger && typeof (prisma as any).passenger.findMany === 'function') {
         existingPassengers = await (prisma as any).passenger.findMany({
-          where: { booking: { tripId: Number(tripId), status: { in: ['CONFIRMED', 'PENDING'] } } },
+          where: {
+            booking: {
+              tripId: Number(tripId),
+              organizationId: auth.organizationId,
+              status: { in: ['CONFIRMED', 'PENDING'] },
+            },
+          },
           select: { seat: true, gender: true }
         });
       }
@@ -128,18 +136,19 @@ export async function POST(req: Request) {
 
   // Normalize and validate IDs
   const tripIdNum = Number(tripId);
-  const userIdNum = Number(userId);
+  const userIdNum = Number(auth.userId);
   if (isNaN(tripIdNum)) return NextResponse.json({ error: 'Invalid trip id' }, { status: 400 });
   if (isNaN(userIdNum)) return NextResponse.json({ error: 'Invalid user id' }, { status: 401 });
 
   // Verify trip and user exist to avoid FK errors
-  const trip = await prisma.trip.findUnique({ where: { id: tripIdNum } });
+  const trip = await prisma.trip.findFirst({ where: { id: tripIdNum, organizationId: auth.organizationId } });
   if (!trip) return NextResponse.json({ error: 'Trip not found' }, { status: 404 });
-  const user = await prisma.user.findUnique({ where: { id: userIdNum } });
+  const user = await prisma.user.findFirst({ where: { id: userIdNum, organizationId: auth.organizationId } });
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 401 });
 
     const booking = await prisma.booking.create({
       data: {
+        organizationId: auth.organizationId,
         userId: userIdNum,
         tripId: tripIdNum,
         seats: JSON.stringify(seatsArray),

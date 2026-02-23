@@ -19,6 +19,7 @@ export function requireAdminFromToken(token?: string | null) {
   const payload = verifyToken(token);
   if (!payload) return null;
   if (!payload.isAdmin) return null;
+  if (!payload.organizationId) return null;
   return payload;
 }
 

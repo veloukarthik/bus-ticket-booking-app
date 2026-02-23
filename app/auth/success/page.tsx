@@ -22,6 +22,7 @@ function AuthSuccessContent() {
           id: session.user?.id ?? 0,
           email: session.user?.email ?? "",
           isAdmin: Boolean(session.user?.isAdmin),
+          organizationId: session.user?.organizationId ?? undefined,
           name: session.user?.name ?? undefined,
         });
       }

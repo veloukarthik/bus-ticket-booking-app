@@ -9,6 +9,11 @@ async function main() {
   await prisma.trip.deleteMany();
   await prisma.vehicle.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.organization.deleteMany();
+
+  const organization = await prisma.organization.create({
+    data: { name: "Default Organization", slug: "default" },
+  });
 
   const vehiclesData = [
     { name: "Volvo B11R", number: "KA01AB1234", capacity: 40 },
@@ -30,7 +35,9 @@ async function main() {
   let totalTrips = 0;
 
   for (const v of vehiclesData) {
-    const vehicle = await prisma.vehicle.create({ data: v });
+    const vehicle = await prisma.vehicle.create({
+      data: { ...v, organizationId: organization.id },
+    });
     totalVehicles++;
 
     const tripCreates: Promise<any>[] = [];
@@ -52,6 +59,7 @@ async function main() {
         tripCreates.push(
           prisma.trip.create({
             data: {
+              organizationId: organization.id,
               vehicleId: vehicle.id,
               source: r.source,
               destination: r.destination,
@@ -70,7 +78,15 @@ async function main() {
 
   // Create an admin user
   const hashed = await bcrypt.hash("adminpass", 10);
-  await prisma.user.create({ data: { name: "Admin", email: "admin@example.com", password: hashed, isAdmin: true } });
+  await prisma.user.create({
+    data: {
+      name: "Admin",
+      email: "admin@example.com",
+      password: hashed,
+      isAdmin: true,
+      organizationId: organization.id,
+    },
+  });
 
   console.log(`Seeded ${totalVehicles} vehicles and ${totalTrips} trips.`);
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { resolveOrganizationId } from '@/lib/tenant';
 
 export async function POST(req: Request) {
   try {
@@ -16,7 +17,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Source and destination cannot be the same' }, { status: 400 });
     }
 
-    const locations = await prisma.trip.findMany({ select: { source: true, destination: true } });
+    const organizationId = resolveOrganizationId(req, true);
+    if (!organizationId) return NextResponse.json({ error: 'Organization not resolved' }, { status: 400 });
+
+    const locations = await prisma.trip.findMany({
+      where: { organizationId },
+      select: { source: true, destination: true },
+    });
     const validCities = new Set<string>();
     locations.forEach((row) => {
       if (row.source) validCities.add(row.source.trim().toLowerCase());
@@ -27,7 +34,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Please select valid source and destination from available cities' }, { status: 400 });
     }
 
-    const where: any = {};
+    const where: any = { organizationId };
 
     where.source = { equals: src, mode: 'insensitive' };
     where.destination = { equals: dst, mode: 'insensitive' };

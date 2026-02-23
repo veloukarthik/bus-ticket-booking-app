@@ -6,6 +6,7 @@ declare module "next-auth" {
     user?: DefaultSession["user"] & {
       id?: number;
       isAdmin?: boolean;
+      organizationId?: number;
     };
   }
 }
@@ -16,5 +17,6 @@ declare module "next-auth/jwt" {
     appUserId?: number;
     appUserEmail?: string;
     appIsAdmin?: boolean;
+    appOrganizationId?: number;
   }
 }

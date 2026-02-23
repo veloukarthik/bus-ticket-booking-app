@@ -74,7 +74,7 @@ export default function AuthModal({ open, onCloseAction, initial }: { open: bool
         // set user in provider (naive decode)
         try {
           const payload = JSON.parse(atob(data.token.split('.')[1]));
-          setUser({ id: payload.userId, email: payload.email, isAdmin: payload.isAdmin });
+          setUser({ id: payload.userId, email: payload.email, isAdmin: payload.isAdmin, organizationId: payload.organizationId });
         } catch (e) {}
         onCloseAction();
       } else {

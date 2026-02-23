@@ -22,8 +22,8 @@ describe('auth utils', () => {
   });
 
   it('requires admin in token payload', () => {
-    const adminToken = signToken({ userId: 1, isAdmin: true });
-    const userToken = signToken({ userId: 2, isAdmin: false });
+    const adminToken = signToken({ userId: 1, isAdmin: true, organizationId: 1 });
+    const userToken = signToken({ userId: 2, isAdmin: false, organizationId: 1 });
 
     expect(requireAdminFromToken(adminToken)).toBeTruthy();
     expect(requireAdminFromToken(userToken)).toBeNull();

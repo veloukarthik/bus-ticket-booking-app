@@ -33,9 +33,30 @@ In your GitHub OAuth app settings, use this callback URL for local development:
 http://localhost:3000/api/auth/callback/github
 ```
 
+## SaaS Multi-Tenant Setup
+
+This app now supports tenant scoping using an `Organization` model and `organizationId` across core business entities.
+
+Set this env for public (non-authenticated) routes to resolve tenant context:
+
+```bash
+DEFAULT_ORGANIZATION_ID="1"
+```
+
+Run migrations after pulling latest changes:
+
+```bash
+npx prisma migrate deploy --schema=prisma/schema.prisma
+```
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## License
+
+This project is distributed under a proprietary commercial license.
+See `LICENSE` for terms. Any resale, transfer, white-label, or commercial use requires a written agreement.
 
 ## Learn More
 

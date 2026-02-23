@@ -44,16 +44,27 @@ function deterministicOffsetMinutes(seed: string): number {
 }
 
 async function ensureVehicles() {
-  const vehicles = await prisma.vehicle.findMany({ orderBy: { id: "asc" } });
+  const defaultOrgId = Number(process.env.DEFAULT_ORGANIZATION_ID || "1");
+  const vehicles = await prisma.vehicle.findMany({
+    where: { organizationId: defaultOrgId },
+    orderBy: { id: "asc" },
+  });
   if (vehicles.length > 0) return vehicles;
 
   for (const vehicle of DEFAULT_VEHICLES) {
-    await prisma.vehicle.create({ data: vehicle });
+    await prisma.vehicle.create({ data: { ...vehicle, organizationId: defaultOrgId } });
   }
-  return prisma.vehicle.findMany({ orderBy: { id: "asc" } });
+  return prisma.vehicle.findMany({ where: { organizationId: defaultOrgId }, orderBy: { id: "asc" } });
 }
 
 async function main() {
+  const defaultOrgId = Number(process.env.DEFAULT_ORGANIZATION_ID || "1");
+  await prisma.organization.upsert({
+    where: { id: defaultOrgId },
+    update: {},
+    create: { id: defaultOrgId, name: "Default Organization", slug: "default" },
+  });
+
   const vehicles = await ensureVehicles();
   const now = new Date();
   const start = dayStart(now);
@@ -63,6 +74,7 @@ async function main() {
   const existingTrips = await prisma.trip.findMany({
     where: {
       OR: ROUTES.map((route) => ({ source: route.source, destination: route.destination })),
+      organizationId: defaultOrgId,
       departure: { gte: start, lt: end },
     },
     select: {
@@ -112,6 +124,7 @@ async function main() {
       createOps.push(
         prisma.trip.create({
           data: {
+            organizationId: defaultOrgId,
             vehicleId: vehicle.id,
             source: route.source,
             destination: route.destination,

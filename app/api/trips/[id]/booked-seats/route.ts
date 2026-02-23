@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { resolveOrganizationId } from '@/lib/tenant';
 
 export async function GET(
   request: Request,
@@ -13,12 +14,24 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid trip ID' }, { status: 400 });
     }
 
+    const organizationId = resolveOrganizationId(request, true);
+    if (!organizationId) return NextResponse.json({ error: 'Organization not resolved' }, { status: 400 });
+
+    const trip = await prisma.trip.findFirst({ where: { id: tripId, organizationId }, select: { id: true } });
+    if (!trip) return NextResponse.json({ error: 'Trip not found' }, { status: 404 });
+
     // fetch passenger-level data when available
     let passengers: any[] = [];
     try {
       if (prisma && (prisma as any).passenger && typeof (prisma as any).passenger.findMany === 'function') {
         passengers = await (prisma as any).passenger.findMany({
-          where: { booking: { tripId: tripId, status: { in: ['CONFIRMED', 'PENDING'] } } },
+          where: {
+            booking: {
+              tripId: tripId,
+              organizationId,
+              status: { in: ['CONFIRMED', 'PENDING'] },
+            },
+          },
           select: { seat: true, gender: true }
         });
       }
@@ -34,7 +47,7 @@ export async function GET(
 
     // fallback to original behaviour if passenger table is empty
     const bookings = await prisma.booking.findMany({
-      where: { tripId: tripId, status: { in: ['CONFIRMED', 'PENDING'] } },
+      where: { tripId: tripId, organizationId, status: { in: ['CONFIRMED', 'PENDING'] } },
       select: { seats: true }
     });
     const bookedSeats = bookings.flatMap((booking: { seats: string }) => {

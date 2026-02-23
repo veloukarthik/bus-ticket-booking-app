@@ -11,14 +11,24 @@ function getUserId(req: Request): number | null {
   return Number.isNaN(id) ? null : id;
 }
 
+function getOrganizationId(req: Request): number | null {
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) return null;
+  const token = authHeader.split(" ")[1];
+  const payload = verifyToken(token) as any;
+  const id = Number(payload?.organizationId);
+  return Number.isNaN(id) ? null : id;
+}
+
 export async function GET(req: Request) {
   const userId = getUserId(req);
-  if (!userId) return NextResponse.json({ suggestions: [] });
+  const organizationId = getOrganizationId(req);
+  if (!userId || !organizationId) return NextResponse.json({ suggestions: [] });
 
   try {
     const passengers = await prisma.passenger.findMany({
       where: {
-        booking: { userId },
+        booking: { userId, organizationId },
       },
       select: {
         name: true,

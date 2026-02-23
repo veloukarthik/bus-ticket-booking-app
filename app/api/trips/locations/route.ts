@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { resolveOrganizationId } from '@/lib/tenant';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const rows = await prisma.trip.findMany({ select: { source: true, destination: true } });
+    const organizationId = resolveOrganizationId(req, true);
+    if (!organizationId) return NextResponse.json({ error: 'Organization not resolved' }, { status: 400 });
+
+    const rows = await prisma.trip.findMany({
+      where: { organizationId },
+      select: { source: true, destination: true },
+    });
 
     const sources = Array.from(new Set(rows.map(r => r.source).filter(Boolean))).sort();
     const destinations = Array.from(new Set(rows.map(r => r.destination).filter(Boolean))).sort();
