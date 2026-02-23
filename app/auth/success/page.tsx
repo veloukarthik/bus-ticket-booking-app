@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { getSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useUser } from "@/app/providers/UserProvider";
 
-export default function AuthSuccessPage() {
+function AuthSuccessContent() {
   const router = useRouter();
   const params = useSearchParams();
   const { setUser } = useUser();
@@ -42,5 +42,19 @@ export default function AuthSuccessPage() {
     <div className="mx-auto max-w-3xl p-6 text-center">
       <h1 className="text-2xl font-semibold">Signing you in...</h1>
     </div>
+  );
+}
+
+export default function AuthSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-3xl p-6 text-center">
+          <h1 className="text-2xl font-semibold">Signing you in...</h1>
+        </div>
+      }
+    >
+      <AuthSuccessContent />
+    </Suspense>
   );
 }
